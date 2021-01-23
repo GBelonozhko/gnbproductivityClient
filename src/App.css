@@ -36,3 +36,20 @@
     transform: rotate(360deg);
   }
 }
+
+
+.paddingtextfield{
+  margin: 2rem, 5rem, 1rem, 1rem;
+  align-items: center;
+}
+
+.AuthTopMargin {
+  margin-top: 5%;
+  align-items: center;
+  padding-bottom: 1rem;
+  padding-top: 1rem;
+}
+
+body {
+  background-color: #414e68;
+}
