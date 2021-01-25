@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   BrowserRouter,
   Route,
@@ -15,8 +15,21 @@ import ListSelection from './containers/ListSelection.jsx';
 
 import AppBar from './components/AppBar.jsx';
 
+import { useSelector, useDispatch } from 'react-redux';
+import * as actions from './store/actions/Auth.Action'
+
 const Routes =() =>{
 
+  const dispatch = useDispatch()
+
+  useEffect (() => { 
+   dispatch(actions.authCheckState())
+      
+  
+  },  []  );
+
+
+  
     return(
         <BrowserRouter>
         <AppBar/>

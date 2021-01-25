@@ -1,45 +1,54 @@
-import { createStore, applyMiddleware, } from 'redux';
-import {composeWithDevTools, actionCreators,} from 'redux-devtools-extension';
+import { createStore, applyMiddleware } from "redux";
+import { composeWithDevTools, actionCreators } from "redux-devtools-extension";
 // middlewares
-import thunkMiddleware from 'redux-thunk'
-import logger from 'redux-logger'
-import rootReducer from '../Reducers';
-
-
-
+import thunkMiddleware from "redux-thunk";
+import logger from "redux-logger";
+import rootReducer from "./reducers";
 
 const initialState = {};
 
 function saveToLocalStorage(state) {
-    try {
-        const serializedState = JSON.stringify(state)
-        localStorage.setItem('state', serializedState)
-    }catch(e){
-        console.log(e);
-    }
+  try {
+    const serializedState = JSON.stringify(state);
+    localStorage.setItem("state", serializedState);
+  } catch (e) {
+    console.log(e);
+  }
 }
 
 function loadFromLocalStorage() {
-    try {
-        const serializedState = localStorage.getItem('state')
-        if(serializedState === null) return undefined
-        return JSON.parse(serializedState)
-    }catch (e) {
-        return undefined
-    }
+  try {
+    const serializedState = localStorage.getItem("state");
+    if (serializedState === null) return undefined;
+    return JSON.parse(serializedState);
+  } catch (e) {
+    return undefined;
+  }
 }
 
-const persistedState = loadFromLocalStorage()
+const persistedState = loadFromLocalStorage();
 
 /**
  * Create a Redux store that holds the app state.
  * 
  
  */
-const composeEnhancers = composeWithDevTools({ 
-    name: `Redux`,
-    realtime: true,
-    trace: true,
-    traceLimit: 25
-}); 
+const composeEnhancers = composeWithDevTools({
+  name: `Redux`,
+  realtime: true,
+  trace: true,
+  traceLimit: 25,
+});
 
+const store = createStore(
+  rootReducer,
+  persistedState,
+  composeEnhancers(applyMiddleware(thunkMiddleware, logger))
+);
+
+store.subscribe(() => {
+    saveToLocalStorage(store.getState());
+  
+  });
+
+export default store;
