@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Container from "@material-ui/core/Container";
 import Card from "@material-ui/core/Card";
 import TextField from "@material-ui/core/TextField";
@@ -22,6 +22,13 @@ import Switch from "@material-ui/core/Switch";
 import { IoIosSend } from "react-icons/io";
 import { BiArchiveOut, BiArchiveIn } from "react-icons/bi";
 import { GiClockwork } from "react-icons/gi";
+import {
+  initTodoLists,
+  setTodoLists,
+  initCompleteCount,
+  initTotalTasks,
+} from "../store/actions/ToDo.Action";
+import { useSelector, useDispatch } from "react-redux";
 
 const useStyles = makeStyles((theme) => ({
   modal: {
@@ -43,6 +50,19 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const ListSelection = () => {
+  const dispatch = useDispatch();
+
+  const userId = useSelector((state) => state.Auth.userId);
+  const todoLists = useSelector((state) => state.Todos.todoLists);
+  const completeCount = useSelector((state) => state.Todos.totalCompletes);
+  const totalTasks = useSelector((state) => state.Todos.totalTasks);
+
+  useEffect(() => {
+    dispatch(initCompleteCount(userId));
+    dispatch(initTodoLists(userId));
+    dispatch(initTotalTasks(userId));
+  }, []);
+
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
 
@@ -73,13 +93,12 @@ const ListSelection = () => {
     <Container maxWidth='md'>
       <Card>
         <Grid container direction='row' justify='center' alignItems='center'>
-          <Grid>
+          <Grid item xs={10}>
             <TextField
               id='standard-basic'
               label='Enter New Goal List'
               fullWidth
               margin='normal'
-              endAdorn
               InputProps={{
                 endAdornment: (
                   <InputAdornment position='end'>
@@ -91,29 +110,36 @@ const ListSelection = () => {
               }}
             />
           </Grid>
+          <Grid item xs={6}>
+            <Typography variant='caption' color='initial'>
+              Completed Total of {completeCount} tasks of {totalTasks} tasks
+              created!
+            </Typography>
+          </Grid>
         </Grid>
       </Card>
 
-      <Card className='AuthTopMargin'>
-        <CardActions onClick={handleOpen}>
-          <Grid container direction='row' justify='center' alignItems='center'>
-            <Grid xs={3}>
-              <Typography>Completes: 0 / Incompletes:0</Typography>
-            </Grid>
+      {todoLists.map((title) => (
+        <Card className='AuthTopMargin'>
+          <CardActions onClick={handleOpen}>
+            <Grid
+              container
+              direction='row'
+              justify='center'
+              alignItems='center'>
+            
 
-            <Grid xs={5}>
-              <Typography align='center' variant='h3'>
-                Goal List Title
-              </Typography>
-            </Grid>
+              <Grid item>
+                <Typography variant='h4' align='center' >
+                  {title}
+                </Typography>
+              </Grid>
 
-            <Grid xs={3}></Grid>
-            <IconButton>
-              <IoIosSend />
-            </IconButton>
-          </Grid>
-        </CardActions>
-      </Card>
+              
+            </Grid>
+          </CardActions>
+        </Card>
+      ))}
 
       <Modal
         aria-labelledby='transition-modal-title'
@@ -134,7 +160,6 @@ const ListSelection = () => {
               label='Enter New Goal'
               fullWidth
               margin='normal'
-              endAdorn
               InputProps={{
                 endAdornment: (
                   <InputAdornment position='end'>
