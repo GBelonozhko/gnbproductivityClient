@@ -12,6 +12,7 @@ import Agenda from './containers/Agenda.jsx';
 import Journal from './containers/Journal.jsx';
 import JournalEntry from './containers/JournalEntry.jsx';
 import ListSelection from './containers/ListSelection.jsx';
+import GoalList from './containers/GoalList'
 
 import AppBar from './components/AppBar.jsx';
 
@@ -37,6 +38,7 @@ const Routes =() =>{
         <Route path ='/' exact component={Auth}/>
         <Route path ='/signup' exact component={Auth}/>
         <Route path ='/ListSelection' exact component={ListSelection}/>
+        <Route path ='/GoalList' exact component={GoalList}/>
         <Route path ='/Agenda' exact component={Agenda}/>
         <Route path ='/FitnessTracker' exact component={FitnessTracker}/>
         <Route path ='/JournalEntry' exact component={JournalEntry}/>

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Container from "@material-ui/core/Container";
 import Card from "@material-ui/core/Card";
 import TextField from "@material-ui/core/TextField";
@@ -18,7 +18,7 @@ import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import ListItemText from "@material-ui/core/ListItemText";
 import Checkbox from "@material-ui/core/Checkbox";
 import Switch from "@material-ui/core/Switch";
-
+import axios from 'axios';
 import { IoIosSend } from "react-icons/io";
 import { BiArchiveOut, BiArchiveIn } from "react-icons/bi";
 import { GiClockwork } from "react-icons/gi";
@@ -29,6 +29,7 @@ import {
   initTotalTasks,
 } from "../store/actions/ToDo.Action";
 import { useSelector, useDispatch } from "react-redux";
+import GoalList from './GoalList';
 
 const useStyles = makeStyles((theme) => ({
   modal: {
@@ -56,6 +57,8 @@ const ListSelection = () => {
   const todoLists = useSelector((state) => state.Todos.todoLists);
   const completeCount = useSelector((state) => state.Todos.totalCompletes);
   const totalTasks = useSelector((state) => state.Todos.totalTasks);
+
+  const [newtask, setnewtask] = useState({title:'' , creator:userId , task:'create a list' , isComplete:false , isVisible:true })
 
   useEffect(() => {
     dispatch(initCompleteCount(userId));
@@ -89,20 +92,35 @@ const ListSelection = () => {
     setChecked(newChecked);
   };
 
+  const handleSubmitNewTodoList = () => {
+    axios.post('/api/addTodo/' , {newtask})
+    setnewtask({title:'' , creator:userId , task:'create a list' , isComplete:false , isVisible:true });
+    dispatch(initTodoLists(userId));
+}
+
+
+
+const handleChangeNewTodoList = (event) => { 
+  setnewtask({ [event.target.name]: event.target.value, task:'create a list' , creator:userId });
+
+};
+
+
   return (
     <Container maxWidth='md'>
       <Card>
         <Grid container direction='row' justify='center' alignItems='center'>
           <Grid item xs={10}>
             <TextField
-              id='standard-basic'
+              name='title'
               label='Enter New Goal List'
               fullWidth
               margin='normal'
+              value={newtask.title} onChange={e => handleChangeNewTodoList(e)} 
               InputProps={{
                 endAdornment: (
                   <InputAdornment position='end'>
-                    <IconButton>
+                    <IconButton onClick={handleSubmitNewTodoList}>
                       <IoIosSend />
                     </IconButton>
                   </InputAdornment>
@@ -120,7 +138,7 @@ const ListSelection = () => {
       </Card>
 
       {todoLists.map((title) => (
-        <Card className='AuthTopMargin'>
+        <Card key={title} className='AuthTopMargin'>
           <CardActions onClick={handleOpen}>
             <Grid
               container
