@@ -18,7 +18,7 @@ import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import ListItemText from "@material-ui/core/ListItemText";
 import Checkbox from "@material-ui/core/Checkbox";
 import Switch from "@material-ui/core/Switch";
-import axios from 'axios';
+import axios from "axios";
 import { IoIosSend } from "react-icons/io";
 import { BiArchiveOut, BiArchiveIn } from "react-icons/bi";
 import { GiClockwork } from "react-icons/gi";
@@ -29,7 +29,7 @@ import {
   initTotalTasks,
 } from "../store/actions/ToDo.Action";
 import { useSelector, useDispatch } from "react-redux";
-import GoalList from './GoalList';
+import GoalList from "./GoalList";
 
 const useStyles = makeStyles((theme) => ({
   modal: {
@@ -58,7 +58,20 @@ const ListSelection = () => {
   const completeCount = useSelector((state) => state.Todos.totalCompletes);
   const totalTasks = useSelector((state) => state.Todos.totalTasks);
 
-  const [newtask, setnewtask] = useState({title:'' , creator:userId , task:'create a list' , isComplete:false , isVisible:true })
+  const [newtask, setnewtask] = useState({
+    title: "",
+    creator: userId,
+    task: "create a list",
+    isComplete: false,
+    isVisible: true,
+  });
+  const [open, setOpen] = React.useState(false);
+  const [checked, setChecked] = React.useState([0]);
+  const [selected, setSelected] = useState("");
+  const [todos, setTodos] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const classes = useStyles();
 
   useEffect(() => {
     dispatch(initCompleteCount(userId));
@@ -66,18 +79,26 @@ const ListSelection = () => {
     dispatch(initTotalTasks(userId));
   }, []);
 
-  const classes = useStyles();
-  const [open, setOpen] = React.useState(false);
+  const initTodos = (todoListName) => {
+    axios
+      .get(`/api/todolist/${userId}/${todoListName}`)
+      .then((res) => setTodos(res.data.todoData));
+  };
 
-  const handleOpen = () => {
+  const handleOpen = (title) => {
+    setIsLoading(true);
+    setSelected(title);
+    setnewtask({title:title , task:'' , isComplete:false , isVisible: true , creator:userId})
+    initTodos(title);
     setOpen(true);
+    setIsLoading(false);
+
+    console.log(selected);
   };
 
   const handleClose = () => {
     setOpen(false);
   };
-
-  const [checked, setChecked] = React.useState([0]);
 
   const handleToggle = (value) => () => {
     const currentIndex = checked.indexOf(value);
@@ -93,18 +114,47 @@ const ListSelection = () => {
   };
 
   const handleSubmitNewTodoList = () => {
-    axios.post('/api/addTodo/' , {newtask})
-    setnewtask({title:'' , creator:userId , task:'create a list' , isComplete:false , isVisible:true });
-    dispatch(initTodoLists(userId));
-}
+    axios.post("/api/addTodo/", { newtask }).then(()=>{dispatch(initTodoLists(userId));
+    dispatch(initTotalTasks(userId));});
+    setnewtask({
+      title: "",
+      creator: userId,
+      task: "create a list",
+      isComplete: false,
+      isVisible: true,
+    });
+    
+  };
 
+  const handleChangeNewTodoList = (event) => {
+    setnewtask({
+      [event.target.name]: event.target.value,
+      task: "create a list",
+      creator: userId,
+    });
+    
+   
+  };
 
+  const handleSubmitNewTodo = () => {
+    setIsLoading(true)
+    setnewtask({...newtask, title:selected })
+    axios.post('/api/addTodo' , {newtask} )
+      .then(res => {
+        console.log(res.data)
+        let ftodos = todos;
+        ftodos.push(res.data)
+        console.log(ftodos)
+        setTodos(ftodos)
+        dispatch(initTotalTasks(userId))
+        setIsLoading(false)
+        setnewtask({title:selected , task:'' , isComplete:false , isVisible: true , creator:userId})
+      })
+  };
 
-const handleChangeNewTodoList = (event) => { 
-  setnewtask({ [event.target.name]: event.target.value, task:'create a list' , creator:userId });
-
-};
-
+  const handleChangeNewTask = (event) => {
+    setnewtask({ ...newtask, [event.target.name]: event.target.value});
+  };
 
   return (
     <Container maxWidth='md'>
@@ -116,7 +166,8 @@ const handleChangeNewTodoList = (event) => {
               label='Enter New Goal List'
               fullWidth
               margin='normal'
-              value={newtask.title} onChange={e => handleChangeNewTodoList(e)} 
+              value={newtask.title}
+              onChange={(e) => handleChangeNewTodoList(e)}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position='end'>
@@ -139,21 +190,17 @@ const handleChangeNewTodoList = (event) => {
 
       {todoLists.map((title) => (
         <Card key={title} className='AuthTopMargin'>
-          <CardActions onClick={handleOpen}>
+          <CardActions onClick={() => handleOpen(title)}>
             <Grid
               container
               direction='row'
               justify='center'
               alignItems='center'>
-            
-
               <Grid item>
-                <Typography variant='h4' align='center' >
+                <Typography variant='h4' align='center'>
                   {title}
                 </Typography>
               </Grid>
-
-              
             </Grid>
           </CardActions>
         </Card>
@@ -171,68 +218,15 @@ const handleChangeNewTodoList = (event) => {
           timeout: 500,
         }}>
         <Fade in={open}>
-          <div className={classes.paper}>
-            <Typography variant='h2'>Goal List Title</Typography>
-            <TextField
-              id='standard-basic'
-              label='Enter New Goal'
-              fullWidth
-              margin='normal'
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position='end'>
-                    <IconButton>
-                      <IoIosSend />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
-
-            <IconButton>
-              <BiArchiveIn />
-            </IconButton>
-            <IconButton className={classes.archive}>
-              <BiArchiveOut />
-            </IconButton>
-
-            <Card>
-              <List className={classes.root}>
-                {[0, 1, 2, 3].map((value) => {
-                  const labelId = `checkbox-list-label-${value}`;
-
-                  return (
-                    <ListItem
-                      key={value}
-                      role={undefined}
-                      dense
-                      button
-                      onClick={handleToggle(value)}>
-                      <ListItemIcon>
-                        <Checkbox
-                          edge='start'
-                          checked={checked.indexOf(value) !== -1}
-                          tabIndex={-1}
-                          disableRipple
-                          inputProps={{ "aria-labelledby": labelId }}
-                        />
-                      </ListItemIcon>
-                      <ListItemText
-                        id={labelId}
-                        primary={`Line item ${value + 1}`}
-                      />
-                      <ListItemSecondaryAction>
-                        <Switch color='primary' />
-                        <IconButton edge='end' aria-label='comments'>
-                          <GiClockwork />
-                        </IconButton>
-                      </ListItemSecondaryAction>
-                    </ListItem>
-                  );
-                })}
-              </List>
-            </Card>
-          </div>
+          <GoalList
+            title={selected}
+            handleToggle={handleToggle}
+            checked={checked}
+            todos={todos}
+            handleSubmitNewTodo={handleSubmitNewTodo}
+            handleChangeNewTask={handleChangeNewTask}
+            newtask={newtask}
+          />
         </Fade>
       </Modal>
     </Container>

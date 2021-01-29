@@ -17,20 +17,7 @@ import { GiClockwork } from "react-icons/gi"
 
 const GoalList = (props) => {
 
-    const [checked, setChecked] = React.useState([0]);
 
-    const handleToggle = (value) => () => {
-      const currentIndex = checked.indexOf(value);
-      const newChecked = [...checked];
-  
-      if (currentIndex === -1) {
-        newChecked.push(value);
-      } else {
-        newChecked.splice(currentIndex, 1);
-      }
-  
-      setChecked(newChecked);
-    };
 
 
   const useStyles = makeStyles((theme) => ({
@@ -56,16 +43,19 @@ const GoalList = (props) => {
 
   return (
     <div className={classes.paper}>
-      <Typography variant='h2'>Goal List Title</Typography>
+      <Typography variant='h2'>{props.title}</Typography>
       <TextField
         id='standard-basic'
         label='Enter New Goal'
         fullWidth
         margin='normal'
+        name='task'
+        value={props.newtask.task}
+        onChange={e=>props.handleChangeNewTask(e)}
         InputProps={{
           endAdornment: (
             <InputAdornment position='end'>
-              <IconButton>
+              <IconButton onClick={e => props.handleSubmitNewTodo(e)}>
                 <IoIosSend />
               </IconButton>
             </InputAdornment>
@@ -82,26 +72,26 @@ const GoalList = (props) => {
 
       <Card>
         <List className={classes.root}>
-          {[0, 1, 2, 3].map((value) => {
-            const labelId = `checkbox-list-label-${value}`;
+          {props.todos.map((todo) => {
+            const labelId = `checkbox-list-label-${todo}`;
 
             return (
               <ListItem
-                key={value}
+                key={todo._id}
                 role={undefined}
                 dense
                 button
-                onClick={handleToggle(value)}>
+                onClick={props.handleToggle(todo.isComplete)}>
                 <ListItemIcon>
                   <Checkbox
                     edge='start'
-                    checked={checked.indexOf(value) !== -1}
+                    checked={props.checked.indexOf(todo.isComplete) !== -1}
                     tabIndex={-1}
                     disableRipple
                     inputProps={{ "aria-labelledby": labelId }}
                   />
                 </ListItemIcon>
-                <ListItemText id={labelId} primary={`Line item ${value + 1}`} />
+                <ListItemText id={labelId} primary={todo.task} />
                 <ListItemSecondaryAction>
                   <Switch color='primary' />
                   <IconButton edge='end' aria-label='comments'>
