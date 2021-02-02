@@ -11,22 +11,15 @@ import { makeStyles } from "@material-ui/core/styles";
 import Modal from "@material-ui/core/Modal";
 import Backdrop from "@material-ui/core/Backdrop";
 import Fade from "@material-ui/core/Fade";
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
-import ListItemText from "@material-ui/core/ListItemText";
-import Checkbox from "@material-ui/core/Checkbox";
-import Switch from "@material-ui/core/Switch";
+
 import axios from "axios";
 import { IoIosSend } from "react-icons/io";
-import { BiArchiveOut, BiArchiveIn } from "react-icons/bi";
-import { GiClockwork } from "react-icons/gi";
+
 import {
   initTodoLists,
   setTodoLists,
   initCompleteCount,
-  initTotalTasks,
+  initTotalTasks, setCompleteCount
 } from "../store/actions/ToDo.Action";
 import { useSelector, useDispatch } from "react-redux";
 import GoalList from "./GoalList";
@@ -97,20 +90,32 @@ const ListSelection = () => {
   };
 
   const handleClose = () => {
+    setIsLoading(true);
+    setSelected();
+    setnewtask({
+      title: "",
+      creator: userId,
+      task: "create a list",
+      isComplete: false,
+      isVisible: true,
+    });
     setOpen(false);
+    setIsLoading(false);
   };
 
-  const handleToggle = (value) => () => {
-    const currentIndex = checked.indexOf(value);
-    const newChecked = [...checked];
-
-    if (currentIndex === -1) {
-      newChecked.push(value);
-    } else {
-      newChecked.splice(currentIndex, 1);
-    }
-
-    setChecked(newChecked);
+  const handleToggle = (todo) => () => {
+    let isCompleteData=true;
+    todo.isComplete==isCompleteData? isCompleteData=false:isCompleteData=true;  
+    
+    axios.patch(`api/CompleteTodo/${todo._id}`,{isCompleteData})
+      .then(res => {
+        axios.get(`api/todolistCompletes/${userId}`)
+        .then(res => {
+          dispatch(setCompleteCount(res.data.Completes))
+        })  
+      })
+     let dtodos =todos.map((dtodo, i)=> dtodo._id==todo._id?{...todo, isComplete:isCompleteData}:todos[i]);
+      setTodos(dtodos);
   };
 
   const handleSubmitNewTodoList = () => {
@@ -155,6 +160,16 @@ const ListSelection = () => {
   const handleChangeNewTask = (event) => {
     setnewtask({ ...newtask, [event.target.name]: event.target.value});
   };
+
+  const handleArchiveComplete = (archiveStatus,todoListName) => {
+    let isVisibleData=archiveStatus;
+    
+    axios.patch(`api/archiveTodo/${userId}/${todoListName}`,{isVisibleData})
+      .then(
+        axios.get(`/api/todolist/${userId}/${todoListName}`)
+      .then(res => setTodos(res.data.todoData))
+
+      )}
 
   return (
     <Container maxWidth='md'>
@@ -226,6 +241,7 @@ const ListSelection = () => {
             handleSubmitNewTodo={handleSubmitNewTodo}
             handleChangeNewTask={handleChangeNewTask}
             newtask={newtask}
+            handleArchiveComplete={handleArchiveComplete}
           />
         </Fade>
       </Modal>

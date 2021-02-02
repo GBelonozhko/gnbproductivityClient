@@ -63,29 +63,29 @@ const GoalList = (props) => {
         }}
       />
 
-      <IconButton>
+      <IconButton onClick={()=> props.handleArchiveComplete(false, props.title)}>
         <BiArchiveIn />
       </IconButton>
       <IconButton className={classes.archive}>
-        <BiArchiveOut />
+        <BiArchiveOut onClick={()=> props.handleArchiveComplete(true,props.title)}/>
       </IconButton>
 
       <Card>
         <List className={classes.root}>
           {props.todos.map((todo) => {
-            const labelId = `checkbox-list-label-${todo}`;
-
-            return (
+            const labelId = `checkbox-list-label-${todo.task}`;
+          return(
+            todo.isVisible == true ? (
               <ListItem
                 key={todo._id}
                 role={undefined}
                 dense
                 button
-                onClick={props.handleToggle(todo.isComplete)}>
+                onClick={props.handleToggle(todo)}>
                 <ListItemIcon>
                   <Checkbox
                     edge='start'
-                    checked={props.checked.indexOf(todo.isComplete) !== -1}
+                    checked={todo.isComplete}
                     tabIndex={-1}
                     disableRipple
                     inputProps={{ "aria-labelledby": labelId }}
@@ -99,7 +99,8 @@ const GoalList = (props) => {
                   </IconButton>
                 </ListItemSecondaryAction>
               </ListItem>
-            );
+            ):null
+          )
           })}
         </List>
       </Card>
