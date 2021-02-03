@@ -11,6 +11,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import Modal from "@material-ui/core/Modal";
 import Backdrop from "@material-ui/core/Backdrop";
 import Fade from "@material-ui/core/Fade";
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 import axios from "axios";
 import { IoIosSend } from "react-icons/io";
@@ -30,13 +31,9 @@ const useStyles = makeStyles((theme) => ({
     alignItems: "center",
     justifyContent: "center",
     borderRadius: "50%",
+    
   },
-  paper: {
-    backgroundColor: theme.palette.background.paper,
-    border: "1px solid #000",
-    boxShadow: theme.shadows[5],
-    padding: theme.spacing(2, 4, 3),
-  },
+
 
   archive: {
     float: "right",
@@ -60,6 +57,7 @@ const ListSelection = () => {
   });
   const [open, setOpen] = React.useState(false);
   const [checked, setChecked] = React.useState([0]);
+  const [switchedOn, setSwitchedOn] = useState([])
   const [selected, setSelected] = useState("");
   const [todos, setTodos] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -103,7 +101,7 @@ const ListSelection = () => {
     setIsLoading(false);
   };
 
-  const handleToggle = (todo) => () => {
+  const handleToggleComplete = (todo) => () => {
     let isCompleteData=true;
     todo.isComplete==isCompleteData? isCompleteData=false:isCompleteData=true;  
     
@@ -117,6 +115,15 @@ const ListSelection = () => {
      let dtodos =todos.map((dtodo, i)=> dtodo._id==todo._id?{...todo, isComplete:isCompleteData}:todos[i]);
       setTodos(dtodos);
   };
+
+  const handleToggleRoutineSwitch = (todo) =>{
+    let isRoutineData=true;
+    todo.isRoutine==isRoutineData? isRoutineData=false:isRoutineData=true; 
+    axios.patch(`/api/toggleRoutine/${todo._id}`, {isRoutineData}) 
+    let dtodos =todos.map((dtodo, i)=> dtodo._id==todo._id?{...todo, isRoutine:isRoutineData}:todos[i]);
+    setTodos(dtodos);
+
+  }
 
   const handleSubmitNewTodoList = () => {
     axios.post("/api/addTodo/", { newtask }).then(()=>{dispatch(initTodoLists(userId));
@@ -168,11 +175,12 @@ const ListSelection = () => {
       .then(
         axios.get(`/api/todolist/${userId}/${todoListName}`)
       .then(res => setTodos(res.data.todoData))
-
       )}
 
+  
+
   return (
-    <Container maxWidth='md'>
+    <Container maxWidth='lg'>
       <Card>
         <Grid container direction='row' justify='center' alignItems='center'>
           <Grid item xs={10}>
@@ -201,6 +209,54 @@ const ListSelection = () => {
             </Typography>
           </Grid>
         </Grid>
+      </Card>
+
+      <Card  className='AuthTopMargin'>
+          <CardActions onClick={() => handleOpen('TodaysAgenda')}>
+            <Grid
+              container
+              direction='row'
+              justify='center'
+              alignItems='center'>
+              <Grid item>
+                <Typography variant='h4' align='center'>
+                Todays Agenda
+                </Typography>
+              </Grid>
+            </Grid>
+          </CardActions>
+        </Card>
+
+        <Card  className='AuthTopMargin'>
+        <CardActions onClick={() => handleOpen('InCompletes')}>
+          <Grid
+            container
+            direction='row'
+            justify='center'
+            alignItems='center'>
+            <Grid item>
+              <Typography variant='h4' align='center'>
+              In Completes
+              </Typography>
+            </Grid>
+          </Grid>
+        </CardActions>
+      </Card>
+
+      <Card  className='AuthTopMargin'>
+        <CardActions onClick={() => handleOpen('OverDue')}>
+          <Grid
+            container
+            direction='row'
+            justify='center'
+            alignItems='center'>
+            <Grid item>
+              <Typography variant='h4' align='center'>
+              Over Due
+              </Typography>
+            </Grid>
+          </Grid>
+        </CardActions>
       </Card>
 
       {todoLists.map((title) => (
@@ -233,16 +289,18 @@ const ListSelection = () => {
           timeout: 500,
         }}>
         <Fade in={open}>
-          <GoalList
-            title={selected}
-            handleToggle={handleToggle}
-            checked={checked}
-            todos={todos}
-            handleSubmitNewTodo={handleSubmitNewTodo}
-            handleChangeNewTask={handleChangeNewTask}
-            newtask={newtask}
-            handleArchiveComplete={handleArchiveComplete}
-          />
+        {isLoading==false? <GoalList
+          title={selected}
+          handleToggle={handleToggleComplete}
+          checked={checked}
+          todos={todos}
+          handleSubmitNewTodo={handleSubmitNewTodo}
+          handleChangeNewTask={handleChangeNewTask}
+          newtask={newtask}
+          handleArchiveComplete={handleArchiveComplete}
+          handleToggleRoutineSwitch ={handleToggleRoutineSwitch}
+        /> : <CircularProgress />}
+         
         </Fade>
       </Modal>
     </Container>
