@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import {
   Typography,
   TextField,
@@ -13,9 +13,12 @@ import {
   ListItem,
   ListItemIcon,
   ListItemSecondaryAction,
-  Menu,
-  MenuItem,
-  Select,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  Button,
 } from "@material-ui/core";
 import { IoIosSend } from "react-icons/io";
 import { BiArchiveOut, BiArchiveIn } from "react-icons/bi";
@@ -27,8 +30,7 @@ const GoalList = (props) => {
       backgroundColor: theme.palette.background.paper,
       border: "1px solid #000",
       boxShadow: theme.shadows[5],
-      padding: theme.spacing(10, 20, 10),
-      margin: theme.spacing(2, 4, 3),
+      padding: theme.spacing(7, 10, 7),
     },
 
     archive: {
@@ -36,15 +38,8 @@ const GoalList = (props) => {
     },
   }));
 
-  const [anchorEl, setAnchorEl] = React.useState(null);
-
-  const handleClickAnchor = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleCloseAnchor = () => {
-    setAnchorEl(null);
-  };
+  const hours = useRef(0);
+  const minutes = useRef(0);
 
   const classes = useStyles();
 
@@ -105,21 +100,55 @@ const GoalList = (props) => {
                 </ListItemIcon>
                 <ListItemText> {todo.task} </ListItemText>
                 <ListItemSecondaryAction>
-                  <IconButton onClick={handleClickAnchor} aria-label='comments'>
+                  <IconButton
+                    onClick={() => {
+                      props.setopenDialog(true);
+                    }}
+                    aria-label='comments'>
                     <GiClockwork />
                   </IconButton>
-                  <Menu
-                    id='simple-menu'
-                    anchorEl={anchorEl}
-                    keepMounted
-                    open={Boolean(anchorEl)}
-                    onClose={handleCloseAnchor}>
-                    <MenuItem onClick={handleCloseAnchor}>
-                      <Select>
-            
-                      </Select>
-                    </MenuItem>
-                  </Menu>
+                  <Dialog
+                    open={props.openDialog}
+                    onClose={() => {
+                      props.setopenDialog(false);
+                    }}>
+                    <DialogTitle>Save Complete Time </DialogTitle>
+                    <DialogContent>
+                      <form className={classes.container}>
+                        <FormControl className={classes.formControl}>
+                          <TextField
+                            type='number'
+                            id='hours'
+                            label='Enter Hours'
+                            ref={hours}
+                          />
+                          <TextField
+                            type='number'
+                            id='minutes'
+                            label='Enter Minutes'
+                            ref={minutes}
+                          />
+                        </FormControl>
+                      </form>
+                    </DialogContent>
+                    <DialogActions>
+                      <Button
+                        onClick={() => props.setopenDialog(false)}
+                        color='primary'>
+                        Cancel
+                      </Button>
+                      <Button
+                        onClick={() =>
+                          props.handleSubmitDuration(todo._id, {
+                            hours: hours,
+                            minutes: minutes,
+                          })
+                        }
+                        color='primary'>
+                        Ok
+                      </Button>
+                    </DialogActions>
+                  </Dialog>
                 </ListItemSecondaryAction>
               </ListItem>
             ) : null;

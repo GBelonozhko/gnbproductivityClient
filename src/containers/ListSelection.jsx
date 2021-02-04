@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Container from "@material-ui/core/Container";
 import Card from "@material-ui/core/Card";
 import TextField from "@material-ui/core/TextField";
@@ -11,7 +11,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import Modal from "@material-ui/core/Modal";
 import Backdrop from "@material-ui/core/Backdrop";
 import Fade from "@material-ui/core/Fade";
-import CircularProgress from '@material-ui/core/CircularProgress';
+import CircularProgress from "@material-ui/core/CircularProgress";
 
 import axios from "axios";
 import { IoIosSend } from "react-icons/io";
@@ -20,7 +20,8 @@ import {
   initTodoLists,
   setTodoLists,
   initCompleteCount,
-  initTotalTasks, setCompleteCount
+  initTotalTasks,
+  setCompleteCount,
 } from "../store/actions/ToDo.Action";
 import { useSelector, useDispatch } from "react-redux";
 import GoalList from "./GoalList";
@@ -31,9 +32,7 @@ const useStyles = makeStyles((theme) => ({
     alignItems: "center",
     justifyContent: "center",
     borderRadius: "50%",
-    
   },
-
 
   archive: {
     float: "right",
@@ -55,13 +54,17 @@ const ListSelection = () => {
     isComplete: false,
     isVisible: true,
   });
+
+  const [openDialog, setopenDialog] = useState(false);
   const [open, setOpen] = React.useState(false);
   const [checked, setChecked] = React.useState([0]);
-  const [switchedOn, setSwitchedOn] = useState([])
+  const [switchedOn, setSwitchedOn] = useState([]);
   const [selected, setSelected] = useState("");
   const [todos, setTodos] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
+
+  
   const classes = useStyles();
 
   useEffect(() => {
@@ -79,13 +82,20 @@ const ListSelection = () => {
   const handleOpen = (title) => {
     setIsLoading(true);
     setSelected(title);
-    setnewtask({title:title , task:'' , isComplete:false , isVisible: true , creator:userId})
+    setnewtask({
+      title: title,
+      task: "",
+      isComplete: false,
+      isVisible: true,
+      creator: userId,
+    });
     initTodos(title);
     setOpen(true);
     setIsLoading(false);
 
     console.log(selected);
   };
+
 
   const handleClose = () => {
     setIsLoading(true);
@@ -102,32 +112,45 @@ const ListSelection = () => {
   };
 
   const handleToggleComplete = (todo) => () => {
-    let isCompleteData=true;
-    todo.isComplete==isCompleteData? isCompleteData=false:isCompleteData=true;  
-    
-    axios.patch(`api/CompleteTodo/${todo._id}`,{isCompleteData})
-      .then(res => {
-        axios.get(`api/todolistCompletes/${userId}`)
-        .then(res => {
-          dispatch(setCompleteCount(res.data.Completes))
-        })  
-      })
-     let dtodos =todos.map((dtodo, i)=> dtodo._id==todo._id?{...todo, isComplete:isCompleteData}:todos[i]);
-      setTodos(dtodos);
+    let isCompleteData = true;
+    todo.isComplete == isCompleteData
+      ? (isCompleteData = false)
+      : (isCompleteData = true);
+
+    axios
+      .patch(`api/CompleteTodo/${todo._id}`, { isCompleteData })
+      .then((res) => {
+        axios.get(`api/todolistCompletes/${userId}`).then((res) => {
+          dispatch(setCompleteCount(res.data.Completes));
+        });
+      });
+    let dtodos = todos.map((dtodo, i) =>
+      dtodo._id == todo._id ? { ...todo, isComplete: isCompleteData } : todos[i]
+    );
+    setTodos(dtodos);
   };
 
-  const handleToggleRoutineSwitch = (todo) =>{
-    let isRoutineData=true;
-    todo.isRoutine==isRoutineData? isRoutineData=false:isRoutineData=true; 
-    axios.patch(`/api/toggleRoutine/${todo._id}`, {isRoutineData}) 
-    let dtodos =todos.map((dtodo, i)=> dtodo._id==todo._id?{...todo, isRoutine:isRoutineData}:todos[i]);
+  const handleToggleRoutineSwitch = (todo) => {
+    let isRoutineData = true;
+    todo.isRoutine == isRoutineData
+      ? (isRoutineData = false)
+      : (isRoutineData = true);
+    axios.patch(`/api/toggleRoutine/${todo._id}`, { isRoutineData });
+    let dtodos = todos.map((dtodo, i) =>
+      dtodo._id == todo._id ? { ...todo, isRoutine: isRoutineData } : todos[i]
+    );
     setTodos(dtodos);
+  };
 
+  const handleSubmitDuration = (todoId,duration) => {
+    axios.patch(`/api/updateDuration/${todoId}`, {duration})
   }
 
   const handleSubmitNewTodoList = () => {
-    axios.post("/api/addTodo/", { newtask }).then(()=>{dispatch(initTodoLists(userId));
-    dispatch(initTotalTasks(userId));});
+    axios.post("/api/addTodo/", { newtask }).then(() => {
+      dispatch(initTodoLists(userId));
+      dispatch(initTotalTasks(userId));
+    });
     setnewtask({
       title: "",
       creator: userId,
@@ -135,7 +158,6 @@ const ListSelection = () => {
       isComplete: false,
       isVisible: true,
     });
-    
   };
 
   const handleChangeNewTodoList = (event) => {
@@ -144,40 +166,45 @@ const ListSelection = () => {
       task: "create a list",
       creator: userId,
     });
-    
-   
   };
 
   const handleSubmitNewTodo = () => {
-    setIsLoading(true)
-    setnewtask({...newtask, title:selected })
-    axios.post('/api/addTodo' , {newtask} )
-      .then(res => {
-        console.log(res.data)
-        let ftodos = todos;
-        ftodos.push(res.data)
-        console.log(ftodos)
-        setTodos(ftodos)
-        dispatch(initTotalTasks(userId))
-        setIsLoading(false)
-        setnewtask({title:selected , task:'' , isComplete:false , isVisible: true , creator:userId})
-      })
+    setIsLoading(true);
+    setnewtask({ ...newtask, title: selected });
+    axios.post("/api/addTodo", { newtask }).then((res) => {
+      console.log(res.data);
+      let ftodos = todos;
+      ftodos.push(res.data);
+      console.log(ftodos);
+      setTodos(ftodos);
+      dispatch(initTotalTasks(userId));
+      setIsLoading(false);
+      setnewtask({
+        title: selected,
+        task: "",
+        isComplete: false,
+        isVisible: true,
+        creator: userId,
+      });
+    });
   };
 
   const handleChangeNewTask = (event) => {
-    setnewtask({ ...newtask, [event.target.name]: event.target.value});
+    setnewtask({ ...newtask, [event.target.name]: event.target.value });
   };
 
-  const handleArchiveComplete = (archiveStatus,todoListName) => {
-    let isVisibleData=archiveStatus;
-    
-    axios.patch(`api/archiveTodo/${userId}/${todoListName}`,{isVisibleData})
+  const handleArchiveComplete = (archiveStatus, todoListName) => {
+    setIsLoading(true)
+    let isVisibleData = archiveStatus;
+    axios
+      .patch(`api/archiveTodo/${userId}/${todoListName}`, { isVisibleData })
       .then(
-        axios.get(`/api/todolist/${userId}/${todoListName}`)
-      .then(res => setTodos(res.data.todoData))
-      )}
-
-  
+        axios
+          .get(`/api/todolist/${userId}/${todoListName}`)
+          .then((res) => setTodos(res.data.todoData))
+      );
+    setIsLoading(false)
+  };
 
   return (
     <Container maxWidth='lg'>
@@ -211,48 +238,36 @@ const ListSelection = () => {
         </Grid>
       </Card>
 
-      <Card  className='AuthTopMargin'>
-          <CardActions onClick={() => handleOpen('TodaysAgenda')}>
-            <Grid
-              container
-              direction='row'
-              justify='center'
-              alignItems='center'>
-              <Grid item>
-                <Typography variant='h4' align='center'>
-                Todays Agenda
-                </Typography>
-              </Grid>
-            </Grid>
-          </CardActions>
-        </Card>
-
-        <Card  className='AuthTopMargin'>
-        <CardActions onClick={() => handleOpen('InCompletes')}>
-          <Grid
-            container
-            direction='row'
-            justify='center'
-            alignItems='center'>
+      <Card className='AuthTopMargin'>
+        <CardActions onClick={() => handleOpen("TodaysAgenda")}>
+          <Grid container direction='row' justify='center' alignItems='center'>
             <Grid item>
               <Typography variant='h4' align='center'>
-              In Completes
+                Todays Agenda
               </Typography>
             </Grid>
           </Grid>
         </CardActions>
       </Card>
 
-      <Card  className='AuthTopMargin'>
-        <CardActions onClick={() => handleOpen('OverDue')}>
-          <Grid
-            container
-            direction='row'
-            justify='center'
-            alignItems='center'>
+      <Card className='AuthTopMargin'>
+        <CardActions onClick={() => handleOpen("InCompletes")}>
+          <Grid container direction='row' justify='center' alignItems='center'>
             <Grid item>
               <Typography variant='h4' align='center'>
-              Over Due
+                In Completes
+              </Typography>
+            </Grid>
+          </Grid>
+        </CardActions>
+      </Card>
+
+      <Card className='AuthTopMargin'>
+        <CardActions onClick={() => handleOpen("OverDue")}>
+          <Grid container direction='row' justify='center' alignItems='center'>
+            <Grid item>
+              <Typography variant='h4' align='center'>
+                Over Due
               </Typography>
             </Grid>
           </Grid>
@@ -289,18 +304,24 @@ const ListSelection = () => {
           timeout: 500,
         }}>
         <Fade in={open}>
-        {isLoading==false? <GoalList
-          title={selected}
-          handleToggle={handleToggleComplete}
-          checked={checked}
-          todos={todos}
-          handleSubmitNewTodo={handleSubmitNewTodo}
-          handleChangeNewTask={handleChangeNewTask}
-          newtask={newtask}
-          handleArchiveComplete={handleArchiveComplete}
-          handleToggleRoutineSwitch ={handleToggleRoutineSwitch}
-        /> : <CircularProgress />}
-         
+          {isLoading == false ? (
+            <GoalList
+              title={selected}
+              handleToggle={handleToggleComplete}
+              checked={checked}
+              todos={todos}
+              handleSubmitNewTodo={handleSubmitNewTodo}
+              handleChangeNewTask={handleChangeNewTask}
+              newtask={newtask}
+              handleArchiveComplete={handleArchiveComplete}
+              handleToggleRoutineSwitch={handleToggleRoutineSwitch}
+              openDialog={openDialog}
+              setopenDialog={setopenDialog}
+              handleSubmitDuration={handleSubmitDuration}
+            />
+          ) : (
+            <CircularProgress />
+          )}
         </Fade>
       </Modal>
     </Container>
