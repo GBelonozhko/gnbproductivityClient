@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState} from "react";
 import Container from "@material-ui/core/Container";
 import Card from "@material-ui/core/Card";
 import TextField from "@material-ui/core/TextField";
@@ -62,8 +62,7 @@ const ListSelection = () => {
   const [selected, setSelected] = useState("");
   const [todos, setTodos] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-
-
+  
   
   const classes = useStyles();
 

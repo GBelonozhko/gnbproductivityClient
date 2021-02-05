@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React from "react";
 import {
   Typography,
   TextField,
@@ -38,8 +38,8 @@ const GoalList = (props) => {
     },
   }));
 
-  const hours = useRef(0);
-  const minutes = useRef(0);
+  let hours = 2;
+  let minutes = 0;
 
   const classes = useStyles();
 
@@ -112,7 +112,7 @@ const GoalList = (props) => {
                     onClose={() => {
                       props.setopenDialog(false);
                     }}>
-                    <DialogTitle>Save Complete Time </DialogTitle>
+                    <DialogTitle>Save Complete Time {todo.task}</DialogTitle>
                     <DialogContent>
                       <form className={classes.container}>
                         <FormControl className={classes.formControl}>
@@ -120,13 +120,13 @@ const GoalList = (props) => {
                             type='number'
                             id='hours'
                             label='Enter Hours'
-                            ref={hours}
+                            value={hours}
                           />
                           <TextField
                             type='number'
                             id='minutes'
                             label='Enter Minutes'
-                            ref={minutes}
+                            value={minutes}
                           />
                         </FormControl>
                       </form>
@@ -139,10 +139,7 @@ const GoalList = (props) => {
                       </Button>
                       <Button
                         onClick={() =>
-                          props.handleSubmitDuration(todo._id, {
-                            hours: hours,
-                            minutes: minutes,
-                          })
+                          props.handleSubmitDuration(todo._id, hours)
                         }
                         color='primary'>
                         Ok
