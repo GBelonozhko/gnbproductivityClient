@@ -12,13 +12,7 @@ import {
   Switch,
   ListItem,
   ListItemIcon,
-  ListItemSecondaryAction,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
-  Button,
+  Grid,CircularProgress
 } from "@material-ui/core";
 import { IoIosSend } from "react-icons/io";
 import { BiArchiveOut, BiArchiveIn } from "react-icons/bi";
@@ -38,13 +32,11 @@ const GoalList = (props) => {
     },
   }));
 
-  let hours = 2;
-  let minutes = 0;
-
   const classes = useStyles();
 
   return (
     <div className={classes.paper}>
+    {props.isLoading === false ? (<div>
       <Typography variant='h2'>{props.title}</Typography>
       {props.title !== "TodaysAgenda" &&
       props.title !== "InCompletes" &&
@@ -84,74 +76,67 @@ const GoalList = (props) => {
         <List>
           {props.todos.map((todo) => {
             return todo.isVisible === true ? (
-              <ListItem
-                key={todo._id}
-                divider
-                button
-                onClick={props.handleToggle(todo)}>
-                <ListItemIcon>
-                  <Checkbox edge='start' checked={todo.isComplete} />
-                  <Switch
-                    color='primary'
-                    checked={todo.isRoutine}
-                    onChange={() => props.handleToggleRoutineSwitch(todo)}
-                    edge='end'
+              <Grid
+                container
+                direction='row'
+                justify='space-between'
+                alignItems='center'>
+                <ListItem key={todo._id} divider>
+                  <ListItemIcon>
+                    <Switch
+                      color='primary'
+                      checked={todo.isRoutine}
+                      onChange={() => props.handleToggleRoutineSwitch(todo)}
+                      edge='end'
+                    />
+                  </ListItemIcon>
+                  <ListItemText> {todo.task}</ListItemText>
+
+                  <Checkbox
+                    edge='start'
+                    checked={todo.isComplete}
+                    onClick={props.handleToggle(todo)}
                   />
-                </ListItemIcon>
-                <ListItemText> {todo.task} </ListItemText>
-                <ListItemSecondaryAction>
-                  <IconButton
-                    onClick={() => {
-                      props.setopenDialog(true);
-                    }}
-                    aria-label='comments'>
-                    <GiClockwork />
-                  </IconButton>
-                  <Dialog
-                    open={props.openDialog}
-                    onClose={() => {
-                      props.setopenDialog(false);
-                    }}>
-                    <DialogTitle>Save Complete Time {todo.task}</DialogTitle>
-                    <DialogContent>
-                      <form className={classes.container}>
-                        <FormControl className={classes.formControl}>
-                          <TextField
-                            type='number'
-                            id='hours'
-                            label='Enter Hours'
-                            value={hours}
-                          />
-                          <TextField
-                            type='number'
-                            id='minutes'
-                            label='Enter Minutes'
-                            value={minutes}
-                          />
-                        </FormControl>
-                      </form>
-                    </DialogContent>
-                    <DialogActions>
-                      <Button
-                        onClick={() => props.setopenDialog(false)}
-                        color='primary'>
-                        Cancel
-                      </Button>
-                      <Button
-                        onClick={() =>
-                          props.handleSubmitDuration(todo._id, hours)
-                        }
-                        color='primary'>
-                        Ok
-                      </Button>
-                    </DialogActions>
-                  </Dialog>
-                </ListItemSecondaryAction>
-              </ListItem>
+                  <Grid xs={4}>
+                    <TextField
+                      id='time'
+                      label='Start Time'
+                      type='time'
+                      defaultValue=''
+                      className={classes.textField}
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      inputProps={{
+                        step: 300, // 5 min
+                      }}
+                    />
+                    <TextField
+                      id='time'
+                      label='Complete Time'
+                      type='time'
+                      defaultValue=''
+                      className={classes.textField}
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      inputProps={{
+                        step: 300, // 5 min
+                      }}
+                    />
+
+                  
+                  </Grid>
+                </ListItem>
+              </Grid>
             ) : null;
           })}
         </List>
       </Card>
+      </div>
+      ) : (
+        <CircularProgress />
+      )}
     </div>
   );
 };

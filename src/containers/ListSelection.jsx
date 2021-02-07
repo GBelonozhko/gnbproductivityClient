@@ -141,10 +141,6 @@ const ListSelection = () => {
     setTodos(dtodos);
   };
 
-  const handleSubmitDuration = (todoId,duration) => {
-    axios.patch(`/api/updateDuration/${todoId}`, {duration})
-  }
-
   const handleSubmitNewTodoList = () => {
     axios.post("/api/addTodo/", { newtask }).then(() => {
       dispatch(initTodoLists(userId));
@@ -303,7 +299,7 @@ const ListSelection = () => {
           timeout: 500,
         }}>
         <Fade in={open}>
-          {isLoading == false ? (
+          {isLoading === false ? (
             <GoalList
               title={selected}
               handleToggle={handleToggleComplete}
@@ -316,7 +312,7 @@ const ListSelection = () => {
               handleToggleRoutineSwitch={handleToggleRoutineSwitch}
               openDialog={openDialog}
               setopenDialog={setopenDialog}
-              handleSubmitDuration={handleSubmitDuration}
+              isLoading={isLoading}
             />
           ) : (
             <CircularProgress />
