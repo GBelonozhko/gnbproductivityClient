@@ -1,4 +1,4 @@
-import React, { useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import Container from "@material-ui/core/Container";
 import Card from "@material-ui/core/Card";
 import TextField from "@material-ui/core/TextField";
@@ -14,6 +14,8 @@ import Fade from "@material-ui/core/Fade";
 import CircularProgress from "@material-ui/core/CircularProgress";
 
 import axios from "axios";
+import moment from "moment";
+import clsx from "clsx";
 import { IoIosSend } from "react-icons/io";
 
 import {
@@ -58,12 +60,13 @@ const ListSelection = () => {
   const [openDialog, setopenDialog] = useState(false);
   const [open, setOpen] = React.useState(false);
   const [checked, setChecked] = React.useState([0]);
-  const [switchedOn, setSwitchedOn] = useState([]);
   const [selected, setSelected] = useState("");
   const [todos, setTodos] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  
-  
+  const [inProgress, setinProgress] = React.useState("");
+  const [timerOn, settimerOn] = React.useState(false);
+  const [success, setSuccess] = React.useState(false);
+
   const classes = useStyles();
 
   useEffect(() => {
@@ -76,6 +79,29 @@ const ListSelection = () => {
     axios
       .get(`/api/todolist/${userId}/${todoListName}`)
       .then((res) => setTodos(res.data.todoData));
+  };
+
+  const buttonClassname = clsx({
+    [classes.buttonSuccess]: success,
+  });
+
+  const handleTimerButtonClick = (todo) => {
+    if (!timerOn) {
+      setinProgress(todo._id);
+      axios.patch(`/api/updateStartTime/${todo._id}`, { time: moment() });
+      setSuccess(false);
+      settimerOn(true);
+    } else {
+      axios.patch(`/api/updateEndTime/${todo._id}`, { time: moment() });
+      setSuccess(true);
+      settimerOn(false);
+      setTimeout(() => {
+        setinProgress("");
+        setSuccess(false);
+      }, 2000);
+
+      initTodos(todo.title);
+    }
   };
 
   const handleOpen = (title) => {
@@ -94,7 +120,6 @@ const ListSelection = () => {
 
     console.log(selected);
   };
-
 
   const handleClose = () => {
     setIsLoading(true);
@@ -189,7 +214,7 @@ const ListSelection = () => {
   };
 
   const handleArchiveComplete = (archiveStatus, todoListName) => {
-    setIsLoading(true)
+    setIsLoading(true);
     let isVisibleData = archiveStatus;
     axios
       .patch(`api/archiveTodo/${userId}/${todoListName}`, { isVisibleData })
@@ -198,7 +223,7 @@ const ListSelection = () => {
           .get(`/api/todolist/${userId}/${todoListName}`)
           .then((res) => setTodos(res.data.todoData))
       );
-    setIsLoading(false)
+    setIsLoading(false);
   };
 
   return (
@@ -224,7 +249,7 @@ const ListSelection = () => {
               }}
             />
           </Grid>
-          <Grid item xs={6}>
+          <Grid item>
             <Typography variant='caption' color='initial'>
               Completed Total of {completeCount} tasks of {totalTasks} tasks
               created!
@@ -232,46 +257,61 @@ const ListSelection = () => {
           </Grid>
         </Grid>
       </Card>
+      <Grid
+        container
+        direction='row'
+        justify='space-evenly'
+        alignItems='flex-start'>
+        <Grid item xs={3}>
+          <Card className='AuthTopMargin'>
+            <CardActions onClick={() => handleOpen("TodaysAgenda")}>
+              <Grid
+                container
+                direction='row'
+                justify='center'
+                alignItems='center'>
+                <Grid item>
+                  <Typography variant='h4' align='center'>
+                    Todays Agenda
+                  </Typography>
+                </Grid>
+              </Grid>
+            </CardActions>
+          </Card>
 
-      <Card className='AuthTopMargin'>
-        <CardActions onClick={() => handleOpen("TodaysAgenda")}>
-          <Grid container direction='row' justify='center' alignItems='center'>
-            <Grid item>
-              <Typography variant='h4' align='center'>
-                Todays Agenda
-              </Typography>
-            </Grid>
-          </Grid>
-        </CardActions>
-      </Card>
+          <Card className='AuthTopMargin'>
+            <CardActions onClick={() => handleOpen("InCompletes")}>
+              <Grid
+                container
+                direction='row'
+                justify='center'
+                alignItems='center'>
+                <Grid item>
+                  <Typography variant='h4' align='center'>
+                    In Completes
+                  </Typography>
+                </Grid>
+              </Grid>
+            </CardActions>
+          </Card>
 
-      <Card className='AuthTopMargin'>
-        <CardActions onClick={() => handleOpen("InCompletes")}>
-          <Grid container direction='row' justify='center' alignItems='center'>
-            <Grid item>
-              <Typography variant='h4' align='center'>
-                In Completes
-              </Typography>
-            </Grid>
-          </Grid>
-        </CardActions>
-      </Card>
-
-      <Card className='AuthTopMargin'>
-        <CardActions onClick={() => handleOpen("OverDue")}>
-          <Grid container direction='row' justify='center' alignItems='center'>
-            <Grid item>
-              <Typography variant='h4' align='center'>
-                Over Due
-              </Typography>
-            </Grid>
-          </Grid>
-        </CardActions>
-      </Card>
-
-      {todoLists.map((title) => (
-        <Card key={title} className='AuthTopMargin'>
-          <CardActions onClick={() => handleOpen(title)}>
+          <Card className='AuthTopMargin'>
+            <CardActions onClick={() => handleOpen("OverDue")}>
+              <Grid
+                container
+                direction='row'
+                justify='center'
+                alignItems='center'>
+                <Grid item>
+                  <Typography variant='h4' align='center'>
+                    Over Due
+                  </Typography>
+                </Grid>
+              </Grid>
+            </CardActions>
+          </Card>
+          <Card className='AuthTopMargin'>
+          <CardActions onClick={() => handleOpen("ActiveRoutines")}>
             <Grid
               container
               direction='row'
@@ -279,46 +319,72 @@ const ListSelection = () => {
               alignItems='center'>
               <Grid item>
                 <Typography variant='h4' align='center'>
-                  {title}
+                  Active Routines
                 </Typography>
               </Grid>
             </Grid>
           </CardActions>
         </Card>
-      ))}
+        </Grid>
 
-      <Modal
-        aria-labelledby='transition-modal-title'
-        aria-describedby='transition-modal-description'
-        className={classes.modal}
-        open={open}
-        onClose={handleClose}
-        closeAfterTransition
-        BackdropComponent={Backdrop}
-        BackdropProps={{
-          timeout: 500,
-        }}>
-        <Fade in={open}>
-          {isLoading === false ? (
-            <GoalList
-              title={selected}
-              handleToggle={handleToggleComplete}
-              checked={checked}
-              todos={todos}
-              handleSubmitNewTodo={handleSubmitNewTodo}
-              handleChangeNewTask={handleChangeNewTask}
-              newtask={newtask}
-              handleArchiveComplete={handleArchiveComplete}
-              handleToggleRoutineSwitch={handleToggleRoutineSwitch}
-              openDialog={openDialog}
-              setopenDialog={setopenDialog}
-              isLoading={isLoading}
-            />
-          ) : (
-            <CircularProgress />
-          )}
-        </Fade>
-      </Modal>
+        <Grid item xs={8}>
+          {todoLists.map((title) => (
+            <Card key={title} className='AuthTopMargin'>
+              <CardActions onClick={() => handleOpen(title)}>
+                <Grid
+                  container
+                  direction='row'
+                  justify='center'
+                  alignItems='center'>
+                  <Grid item>
+                    <Typography variant='h4' align='center'>
+                      {title}
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </CardActions>
+            </Card>
+          ))}
+
+          <Modal
+            aria-labelledby='transition-modal-title'
+            aria-describedby='transition-modal-description'
+            className={classes.modal}
+            open={open}
+            onClose={handleClose}
+            closeAfterTransition
+            BackdropComponent={Backdrop}
+            BackdropProps={{
+              timeout: 500,
+            }}>
+            <Fade in={open}>
+              {isLoading === false ? (
+                <GoalList
+                  title={selected}
+                  handleToggle={handleToggleComplete}
+                  checked={checked}
+                  todos={todos}
+                  handleSubmitNewTodo={handleSubmitNewTodo}
+                  handleChangeNewTask={handleChangeNewTask}
+                  newtask={newtask}
+                  handleArchiveComplete={handleArchiveComplete}
+                  handleToggleRoutineSwitch={handleToggleRoutineSwitch}
+                  openDialog={openDialog}
+                  setopenDialog={setopenDialog}
+                  isLoading={isLoading}
+                  inProgress={inProgress}
+                  handleTimerButtonClick={handleTimerButtonClick}
+                  buttonClassname={buttonClassname}
+                  timerOn={timerOn}
+                  success={success}
+                />
+              ) : (
+                <CircularProgress />
+              )}
+            </Fade>
+          </Modal>
+        </Grid>
+      </Grid>
     </Container>
   );
 };
