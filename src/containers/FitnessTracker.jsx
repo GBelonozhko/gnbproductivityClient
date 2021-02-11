@@ -9,57 +9,24 @@ import TableHead from "@material-ui/core/TableHead";
 import TablePagination from "@material-ui/core/TablePagination";
 import TableRow from "@material-ui/core/TableRow";
 import Container from "@material-ui/core/Container";
-import { Card, TextField, InputAdornment, IconButton } from "@material-ui/core";
+import {
+  Card,
+  TextField,
+  InputAdornment,
+  IconButton,
+  Chip,
+  Grid,
+} from "@material-ui/core";
 import { IoIosSend } from "react-icons/io";
+import { useSelector } from "react-redux";
+import axios from "axios";
 
-const columns = [
-  { id: "name", label: "Date", minWidth: 170 },
-  
-  { id: "code", label: "Time", minWidth: 100 },
-  {
-    id: "population",
-    label: "Weight",
-    minWidth: 170,
-    align: "right",
-    format: (value) => value.toLocaleString("en-US"),
-  },
-  {
-    id: "size",
-    label: "Interval Difference",
-    minWidth: 170,
-    align: "right",
-    format: (value) => value.toLocaleString("en-US"),
-  },
-  
-];
 
-function createData(name, code, population, size) {
-  const density = population / size;
-  return { name, code, population, size, density };
-}
-
-const rows = [
-  createData("India", "IN", 1324171354, 3287263),
-  createData("China", "CN", 1403500365, 9596961),
-  createData("Italy", "IT", 60483973, 301340),
-  createData("United States", "US", 327167434, 9833520),
-  createData("Canada", "CA", 37602103, 9984670),
-  createData("Australia", "AU", 25475400, 7692024),
-  createData("Germany", "DE", 83019200, 357578),
-  createData("Ireland", "IE", 4857000, 70273),
-  createData("Mexico", "MX", 126577691, 1972550),
-  createData("Japan", "JP", 126317000, 377973),
-  createData("France", "FR", 67022000, 640679),
-  createData("United Kingdom", "GB", 67545757, 242495),
-  createData("Russia", "RU", 146793744, 17098246),
-  createData("Nigeria", "NG", 200962417, 923768),
-  createData("Brazil", "BR", 210147125, 8515767),
-];
 
 const useStyles = makeStyles({
   root: {
     width: "100%",
-    marginTop:"3%"
+    marginTop: "3%",
   },
   container: {
     maxHeight: 440,
@@ -68,8 +35,45 @@ const useStyles = makeStyles({
 
 const FitnessTracker = () => {
   const classes = useStyles();
+
+  const userId = useSelector((state) => state.Auth.userId);
+
+  const [titles, setTitles] = React.useState([]);
+  const [selected, setSelected] = React.useState("");
+  const [rows, setRows] = React.useState([])
+  const [selectedValues, setSelectedValues] = React.useState();
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const [numTrack, setNumTrack] = React.useState({
+    creator: userId,
+    value: "",
+    title: "",
+  });
+
+  const columns = [
+    { id: "createdAt", label: "Date", minWidth: 170, align: "center", },
+  
+    {
+      id: "value",
+      label: selected,
+      minWidth: 170,
+      align: "center",
+      format: (value) => value.toLocaleString("en-US"),
+    },
+  ];
+
+  React.useEffect(() => {
+    axios.get(`/api/getnumtackertitles/${userId}`).then((res) => {
+      setTitles(res.data.numtrackTitle);
+    });
+  }, []);
+
+  const handleSelected = (title) => {
+    setSelected(title);
+   
+    axios.get(`/api/numtracker/${userId}/${title}`).then((res)=>setRows(res.data.numtracker))
+
+  };
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -79,6 +83,31 @@ const FitnessTracker = () => {
     setRowsPerPage(+event.target.value);
     setPage(0);
   };
+
+  const handleNumTrackTitleSubmit = (numTrack) => {
+    axios.post(`/api/addnumtracker/`, { numTracker: numTrack });
+  };
+
+  const handleNumTrackValueSubmit = (numTrack) => {
+    axios.post(`/api/addnumtracker/`, { numTracker: numTrack });
+  };
+
+  const handleChangeTitle = (event) => {
+    setNumTrack({
+      ...numTrack,
+      [event.target.name]: event.target.value,
+      value: 0,
+    });
+  };
+
+  const handleChangeValue = (event) => {
+    setNumTrack({
+      ...numTrack,
+      [event.target.name]: event.target.value,
+      title: selected,
+    });
+  };
+
   return (
     <div>
       <Container>
@@ -88,13 +117,16 @@ const FitnessTracker = () => {
             label='Enter New Goal'
             fullWidth
             margin='normal'
-            name='task'
-            //  value={props.newtask.task}
-            // onChange={(e) => props.handleChangeNewTask(e)}
+            name='title'
+            value={numTrack.title}
+            onChange={(e) => handleChangeTitle(e)}
             InputProps={{
               endAdornment: (
                 <InputAdornment position='end'>
-                  <IconButton onClick={(e) => {}}>
+                  <IconButton
+                    onClick={() => {
+                      handleNumTrackTitleSubmit(numTrack);
+                    }}>
                     <IoIosSend />
                   </IconButton>
                 </InputAdornment>
@@ -102,7 +134,27 @@ const FitnessTracker = () => {
             }}
           />
         </Card>
-
+        <Grid
+          container
+          direction='row'
+          justify='space-evenly'
+          alignItems='center'
+          className={classes.root}>
+          {titles.map((title) => (
+            <div key={title}>
+              <Grid>
+                <Chip
+                
+                  label={title}
+                  clickable
+                  color={selected === title ? "primary" : "default"}
+                  onClick={() => handleSelected(title)}
+                />
+              </Grid>
+            </div>
+          ))}
+        </Grid>
+{selected &&
         <Paper className={classes.root}>
           <TableContainer className={classes.container}>
             <Table stickyHeader aria-label='sticky table'>
@@ -127,7 +179,7 @@ const FitnessTracker = () => {
                         hover
                         role='checkbox'
                         tabIndex={-1}
-                        key={row.code}>
+                        key={row._id}>
                         {columns.map((column) => {
                           const value = row[column.id];
                           return (
@@ -144,38 +196,49 @@ const FitnessTracker = () => {
               </TableBody>
             </Table>
           </TableContainer>
-          <TablePagination
-            rowsPerPageOptions={[10, 25, 100]}
-            component='div'
-            count={rows.length}
-            rowsPerPage={rowsPerPage}
-            page={page}
-            onChangePage={handleChangePage}
-            onChangeRowsPerPage={handleChangeRowsPerPage}
-          />
-        </Paper>
 
-        <Card className='AuthTopMargin'>
-          <TextField
-            id='standard-basic'
-            label='Enter New Weight'
-            fullWidth
-            margin='normal'
-            name='task'
+          <Grid
+            container
+            direction='row'
+            justify='space-evenly'
+            alignItems='center'>
+            <Grid item xs={7}>
+            <TextField
+              id='standard-basic'
+              label={'Enter New ' + selected}
+              margin='normal'
+              name='value'
             
-            //  value={props.newtask.task}
-            // onChange={(e) => props.handleChangeNewTask(e)}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position='end'>
-                  <IconButton onClick={(e) => {}}>
-                    <IoIosSend />
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
-        </Card>
+              fullWidth
+              value={numTrack.value}
+              onChange={(e) => handleChangeValue(e)}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position='end'>
+                    <IconButton
+                      onClick={() => {
+                        handleNumTrackValueSubmit(numTrack);
+                      }}>
+                      <IoIosSend />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+            </Grid>
+            <TablePagination
+              rowsPerPageOptions={[10, 25, 100]}
+              component='div'
+              count={rows.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onChangePage={handleChangePage}
+              onChangeRowsPerPage={handleChangeRowsPerPage}
+            />
+          </Grid>
+        </Paper>
+            }
+        
       </Container>
     </div>
   );
