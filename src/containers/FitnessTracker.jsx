@@ -21,8 +21,6 @@ import { IoIosSend } from "react-icons/io";
 import { useSelector } from "react-redux";
 import axios from "axios";
 
-
-
 const useStyles = makeStyles({
   root: {
     width: "100%",
@@ -40,7 +38,7 @@ const FitnessTracker = () => {
 
   const [titles, setTitles] = React.useState([]);
   const [selected, setSelected] = React.useState("");
-  const [rows, setRows] = React.useState([])
+  const [rows, setRows] = React.useState([]);
   const [selectedValues, setSelectedValues] = React.useState();
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
@@ -51,8 +49,8 @@ const FitnessTracker = () => {
   });
 
   const columns = [
-    { id: "createdAt", label: "Date", minWidth: 170, align: "center", },
-  
+    { id: "createdAt", label: "Date", minWidth: 170, align: "center" },
+
     {
       id: "value",
       label: selected,
@@ -70,9 +68,12 @@ const FitnessTracker = () => {
 
   const handleSelected = (title) => {
     setSelected(title);
-   
-    axios.get(`/api/numtracker/${userId}/${title}`).then((res)=>setRows(res.data.numtracker))
+    setPage(0);
+    setRowsPerPage(10)
 
+    axios
+      .get(`/api/numtracker/${userId}/${title}`)
+      .then((res) => setRows(res.data.numtracker));
   };
 
   const handleChangePage = (event, newPage) => {
@@ -86,12 +87,23 @@ const FitnessTracker = () => {
 
   const handleNumTrackTitleSubmit = (numTrack) => {
     axios.post(`/api/addnumtracker/`, { numTracker: numTrack });
+    setSelected(numTrack.title)
+    axios.get(`/api/getnumtackertitles/${userId}`).then((res) => {
+      setTitles(res.data.numtrackTitle);
+    });
   };
 
   const handleNumTrackValueSubmit = (numTrack) => {
-    axios.post(`/api/addnumtracker/`, { numTracker: numTrack });
+    axios.post(`/api/addnumtracker/`, { numTracker: numTrack })
+      setNumTrack({
+        creator: userId,
+        value: "",
+        title: "",
+      });
+    setSelected('')
   };
 
+  
   const handleChangeTitle = (event) => {
     setNumTrack({
       ...numTrack,
@@ -144,7 +156,6 @@ const FitnessTracker = () => {
             <div key={title}>
               <Grid>
                 <Chip
-                
                   label={title}
                   clickable
                   color={selected === title ? "primary" : "default"}
@@ -154,91 +165,89 @@ const FitnessTracker = () => {
             </div>
           ))}
         </Grid>
-{selected &&
-        <Paper className={classes.root}>
-          <TableContainer className={classes.container}>
-            <Table stickyHeader aria-label='sticky table'>
-              <TableHead>
-                <TableRow>
-                  {columns.map((column) => (
-                    <TableCell
-                      key={column.id}
-                      align={column.align}
-                      style={{ minWidth: column.minWidth }}>
-                      {column.label}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {rows
-                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((row) => {
-                    return (
-                      <TableRow
-                        hover
-                        role='checkbox'
-                        tabIndex={-1}
-                        key={row._id}>
-                        {columns.map((column) => {
-                          const value = row[column.id];
-                          return (
-                            <TableCell key={column.id} align={column.align}>
-                              {column.format && typeof value === "number"
-                                ? column.format(value)
-                                : value}
-                            </TableCell>
-                          );
-                        })}
-                      </TableRow>
-                    );
-                  })}
-              </TableBody>
-            </Table>
-          </TableContainer>
+        {selected && (
+          <Paper className={classes.root}>
+            <TableContainer className={classes.container}>
+              <Table stickyHeader aria-label='sticky table'>
+                <TableHead>
+                  <TableRow>
+                    {columns.map((column) => (
+                      <TableCell
+                        key={column.id}
+                        align={column.align}
+                        style={{ minWidth: column.minWidth }}>
+                        {column.label}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {rows
+                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    .map((row) => {
+                      return (
+                        <TableRow
+                          hover
+                          role='checkbox'
+                          tabIndex={-1}
+                          key={row._id}>
+                          {columns.map((column) => {
+                            const value = row[column.id];
+                            return (
+                              <TableCell key={column.id} align={column.align}>
+                                {column.format && typeof value === "number"
+                                  ? column.format(value)
+                                  : value}
+                              </TableCell>
+                            );
+                          })}
+                        </TableRow>
+                      );
+                    })}
+                </TableBody>
+              </Table>
+            </TableContainer>
 
-          <Grid
-            container
-            direction='row'
-            justify='space-evenly'
-            alignItems='center'>
-            <Grid item xs={7}>
-            <TextField
-              id='standard-basic'
-              label={'Enter New ' + selected}
-              margin='normal'
-              name='value'
-            
-              fullWidth
-              value={numTrack.value}
-              onChange={(e) => handleChangeValue(e)}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position='end'>
-                    <IconButton
-                      onClick={() => {
-                        handleNumTrackValueSubmit(numTrack);
-                      }}>
-                      <IoIosSend />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
+            <Grid
+              container
+              direction='row'
+              justify='space-evenly'
+              alignItems='center'>
+              <Grid item xs={7}>
+                <TextField
+                  id='standard-basic'
+                  label={"Enter New " + selected}
+                  margin='normal'
+                  name='value'
+                  fullWidth
+                  value={numTrack.value}
+                  onChange={(e) => handleChangeValue(e)}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position='end'>
+                        <IconButton
+                          onClick={() => {
+                            handleNumTrackValueSubmit(numTrack);
+                          }}>
+                          <IoIosSend />
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Grid>
+              <TablePagination
+                rowsPerPageOptions={[10, 25, 100]}
+                component='div'
+                count={rows.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onChangePage={handleChangePage}
+                onChangeRowsPerPage={handleChangeRowsPerPage}
+              />
             </Grid>
-            <TablePagination
-              rowsPerPageOptions={[10, 25, 100]}
-              component='div'
-              count={rows.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              onChangePage={handleChangePage}
-              onChangeRowsPerPage={handleChangeRowsPerPage}
-            />
-          </Grid>
-        </Paper>
-            }
-        
+          </Paper>
+        )}
       </Container>
     </div>
   );
