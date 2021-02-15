@@ -75,6 +75,7 @@ const GoalList = (props) => {
           props.title !== "OverDue" &&
           props.title !== "ActiveRoutines" ? (
             <div>
+            <form>
               <TextField
                 id='standard-basic'
                 label='Enter New Goal'
@@ -86,14 +87,14 @@ const GoalList = (props) => {
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position='end'>
-                      <IconButton onClick={(e) => props.handleSubmitNewTodo(e)}>
+                      <IconButton type='submit' onClick={(e) => props.handleSubmitNewTodo(e)}>
                         <IoIosSend />
                       </IconButton>
                     </InputAdornment>
                   ),
                 }}
               />
-
+              </form>
               <IconButton
                 onClick={() => props.handleArchiveComplete(false, props.title)}>
                 <BiArchiveIn />

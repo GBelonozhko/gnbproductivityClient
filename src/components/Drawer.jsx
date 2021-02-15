@@ -58,7 +58,7 @@ export default function TemporaryDrawer() {
       onKeyDown={toggleDrawer(anchor, false)}>
       <List>
         <Link href='/'>
-          <ListItem button >
+          <ListItem button>
             <ListItemIcon>
               <IoLogIn />
             </ListItemIcon>
@@ -67,7 +67,7 @@ export default function TemporaryDrawer() {
           <Divider />
         </Link>
         <Link href='/signup'>
-          <ListItem button >
+          <ListItem button>
             <ListItemIcon>
               <FaUserAstronaut />
             </ListItemIcon>
@@ -75,17 +75,9 @@ export default function TemporaryDrawer() {
           </ListItem>
           <Divider />
         </Link>
-        <Link href='/Agenda'>
-          <ListItem button >
-            <ListItemIcon>
-              <CgPlayListCheck />
-            </ListItemIcon>
-            <ListItemText primary={"Agenda"} />
-          </ListItem>
-          <Divider />
-        </Link>
+
         <Link href='/ListSelection'>
-          <ListItem button >
+          <ListItem button>
             <ListItemIcon>
               <GoChecklist />
             </ListItemIcon>
@@ -98,16 +90,7 @@ export default function TemporaryDrawer() {
             <ListItemIcon>
               <BsGraphUp />
             </ListItemIcon>
-            <ListItemText primary={"Fitness Tracker"} />
-          </ListItem>
-          <Divider />
-        </Link>
-        <Link href='/Journal'>
-          <ListItem button >
-            <ListItemIcon>
-              <FaJournalWhills />
-            </ListItemIcon>
-            <ListItemText primary={"Journal"} href='/Journal' />
+            <ListItemText primary={"Tracker"} />
           </ListItem>
           <Divider />
         </Link>
@@ -128,7 +111,9 @@ export default function TemporaryDrawer() {
     <div>
       {["right"].map((anchor) => (
         <React.Fragment key={anchor}>
-          <IconButton color='inherit' onClick={toggleDrawer(anchor, true)}><MdMenu/></IconButton>
+          <IconButton color='inherit' onClick={toggleDrawer(anchor, true)}>
+            <MdMenu />
+          </IconButton>
           <Drawer
             anchor={anchor}
             open={state[anchor]}
