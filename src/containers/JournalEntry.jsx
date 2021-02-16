@@ -23,8 +23,6 @@ import {
   initTotalTasks,
   setCompleteCount,
 } from "../store/actions/ToDo.Action";
-import { updateObject } from "../shared/utility";
-import RatingComp from "../components/Rating";
 
 const Journal = () => {
   const dispatch = useDispatch();
@@ -50,7 +48,7 @@ const Journal = () => {
   const constructRatings = () => {
     let ratingObj = rating;
     todoLists.map((catagory) => {
-      ratingObj.push({ catagory: catagory, rating: 0 });
+      ratingObj.push( 0 );
     });
     setRating(ratingObj);
   };
@@ -59,10 +57,11 @@ const Journal = () => {
     setIsLoading(true);
     let ratingObj = rating;
     const rIndex = ratingObj.findIndex((obj) => obj.catagory === listName);
-    ratingObj[rIndex] = { catagory: listName, rating: newRating };
+    ratingObj[rIndex] = { newRating };
     setRating(ratingObj);
+    
     setIsLoading(false);
-    console.log(ratingObj);
+    console.log(rating);
   };
 
   const handleSubmitJournal = () => {};
@@ -97,7 +96,6 @@ const Journal = () => {
                   {rating.map((listName) => (
                     <ListItem key={listName.catagory} divider>
                       <ListItemText>{listName.catagory}</ListItemText>
-                      <RatingComp catagory={listName.catagory} value={listName.rating} changeValue={handleChangeRating} />
 
                       <Rating
                         name={listName.catagory}
@@ -105,6 +103,7 @@ const Journal = () => {
                         onChange={(event, newValue) => {
                           handleChangeRating(listName.catagory, newValue);
                         }}
+                        precision={.5}
                       />
                     </ListItem>
                   ))}
