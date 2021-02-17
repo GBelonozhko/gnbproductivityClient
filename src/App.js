@@ -2,7 +2,7 @@ import React, {useState, useEffect}from "react";
 import "./App.css";
 import Routes from "./Routes";
 import { Provider } from "react-redux";
-import store from "./store/Store";
+import store from "./store/store";
 import { createMuiTheme } from '@material-ui/core/styles';
 import blue from '@material-ui/core/colors/blue';
 import green from '@material-ui/core/colors/green';

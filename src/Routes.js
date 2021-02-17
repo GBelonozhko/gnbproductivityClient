@@ -12,7 +12,7 @@ import Agenda from './containers/Agenda.jsx';
 import Journal from './containers/Journal.jsx';
 import JournalEntry from './containers/JournalEntry.jsx';
 import ListSelection from './containers/ListSelection.jsx';
-import GoalList from './containers/GoalList'
+import GoalList from './components/GoalList'
 
 import AppBar from './components/AppBar.jsx';
 

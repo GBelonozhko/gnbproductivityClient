@@ -26,7 +26,7 @@ import {
   setCompleteCount,
 } from "../store/actions/ToDo.Action";
 import { useSelector, useDispatch } from "react-redux";
-import GoalList from "./GoalList";
+import GoalList from "../components/GoalList";
 
 const useStyles = makeStyles((theme) => ({
   modal: {
