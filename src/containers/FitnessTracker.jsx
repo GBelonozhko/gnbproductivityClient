@@ -20,6 +20,7 @@ import {
 import { IoIosSend } from "react-icons/io";
 import { useSelector } from "react-redux";
 import axios from "axios";
+import moment from 'moment'
 
 const useStyles = makeStyles({
   root: {
@@ -49,7 +50,7 @@ const FitnessTracker = () => {
   });
 
   const columns = [
-    { id: "createdAt", label: "Date", minWidth: 170, align: "center" },
+    { id: "createdAt", label: "Date", minWidth: 170, align: "center", format:Date},
 
     {
       id: "value",
@@ -195,9 +196,9 @@ const FitnessTracker = () => {
                             const value = row[column.id];
                             return (
                               <TableCell key={column.id} align={column.align}>
-                                {column.format && typeof value === "number"
-                                  ? column.format(value)
-                                  : value}
+                                { value.length > 20?
+                                   moment(value).fromNow(true)+ " ago":value
+                                  }
                               </TableCell>
                             );
                           })}
