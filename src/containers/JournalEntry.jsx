@@ -33,10 +33,8 @@ const Journal = () => {
   const totalTasks = useSelector((state) => state.Todos.totalTasks);
 
   const [isLoading, setIsLoading] = useState(false);
-  const [rating, setRating] = useState([
-    { catagory: "Happiness", rating: 0 },
-    { catagory: "Productivity", rating: 0 },
-  ]);
+  const [rating, setRating] = useState([0, 0]);
+  const [catagory, setCatagory] = useState(['Happieness', 'Productivity']);
 
   useEffect(() => {
     dispatch(initCompleteCount(userId));
@@ -47,8 +45,10 @@ const Journal = () => {
 
   const constructRatings = () => {
     let ratingObj = rating;
+    let catagoryObj = catagory;
     todoLists.map((catagory) => {
-      ratingObj.push( 0 );
+      ratingObj.push(0);
+      catagoryObj.push(catagory)
     });
     setRating(ratingObj);
   };
@@ -59,7 +59,7 @@ const Journal = () => {
     const rIndex = ratingObj.findIndex((obj) => obj.catagory === listName);
     ratingObj[rIndex] = { newRating };
     setRating(ratingObj);
-    
+
     setIsLoading(false);
     console.log(rating);
   };
@@ -72,18 +72,17 @@ const Journal = () => {
         <Container>
           <Grid
             container
-            direction="row"
-            justify="space-evenly"
-            alignItems="center"
-          >
+            direction='row'
+            justify='space-evenly'
+            alignItems='center'>
             <Grid item xs={8}>
-              <Typography variant="h3" align="center" color="secondary">
+              <Typography variant='h3' align='center' color='secondary'>
                 Journal Entry
               </Typography>
               <Card>
                 <form>
-                  <TextField fullWidth multiline={true} margin="normal" />
-                  <Button type="submit" fullWidth onClick={() => {}}>
+                  <TextField fullWidth multiline={true} margin='normal' />
+                  <Button type='submit' fullWidth onClick={() => {}}>
                     Submit
                   </Button>
                 </form>
@@ -93,17 +92,17 @@ const Journal = () => {
             <Grid item xs={3}>
               <Card>
                 <List>
-                  {rating.map((listName) => (
-                    <ListItem key={listName.catagory} divider>
-                      <ListItemText>{listName.catagory}</ListItemText>
+                  {rating.map((listName,i) => (
+                    <ListItem key={i} divider>
+                      <ListItemText>{catagory[i]}</ListItemText>
 
                       <Rating
-                        name={listName.catagory}
+                        name={catagory[i]}
                         value={listName.rating}
                         onChange={(event, newValue) => {
-                          handleChangeRating(listName.catagory, newValue);
+                          handleChangeRating(catagory[i], newValue);
                         }}
-                        precision={.5}
+                        precision={0.5}
                       />
                     </ListItem>
                   ))}
