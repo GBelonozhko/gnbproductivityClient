@@ -23,6 +23,7 @@ import {
   initTotalTasks,
   setCompleteCount,
 } from "../store/actions/ToDo.Action";
+import axios from "axios";
 
 const Journal = () => {
   const dispatch = useDispatch();
@@ -34,7 +35,8 @@ const Journal = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [rating, setRating] = useState([0, 0]);
-  const [catagory, setCatagory] = useState(['Happieness', 'Productivity']);
+  const [catagory, setCatagory] = useState(["Happieness", "Productivity"]);
+  const [journal, setJournal] = useState("");
 
   useEffect(() => {
     dispatch(initCompleteCount(userId));
@@ -48,23 +50,30 @@ const Journal = () => {
     let catagoryObj = catagory;
     todoLists.map((catagory) => {
       ratingObj.push(0);
-      catagoryObj.push(catagory)
+      catagoryObj.push(catagory);
     });
     setRating(ratingObj);
   };
 
-  const handleChangeRating = (listName, newRating) => {
+  const handleChangeRating = (index, newRating) => {
     setIsLoading(true);
     let ratingObj = rating;
-    const rIndex = ratingObj.findIndex((obj) => obj.catagory === listName);
-    ratingObj[rIndex] = { newRating };
+    ratingObj[index] = newRating;
     setRating(ratingObj);
 
     setIsLoading(false);
     console.log(rating);
   };
 
-  const handleSubmitJournal = () => {};
+  const handleSubmitJournal = () => {
+    let ratingObj = [];
+    catagory.map((catagory, i) => {
+      ratingObj.push({ catagory: catagory, rating: rating[i] });
+    });
+    const submitObj = { creator: userId, journal: journal, rating: ratingObj };
+
+    axios.post("api/addjournal/", { journalEntry: submitObj });
+  };
 
   return (
     <div>
@@ -81,8 +90,13 @@ const Journal = () => {
               </Typography>
               <Card>
                 <form>
-                  <TextField fullWidth multiline={true} margin='normal' />
-                  <Button type='submit' fullWidth onClick={() => {}}>
+                  <TextField
+                    fullWidth
+                    multiline={true}
+                    margin='normal'
+                    onChange={(event) => setJournal(event.target.value)}
+                  />
+                  <Button type='submit' fullWidth onClick={handleSubmitJournal}>
                     Submit
                   </Button>
                 </form>
@@ -92,7 +106,8 @@ const Journal = () => {
             <Grid item xs={3}>
               <Card>
                 <List>
-                  {rating.map((listName,i) => (
+                  <Divider />
+                  {rating.map((listName, i) => (
                     <ListItem key={i} divider>
                       <ListItemText>{catagory[i]}</ListItemText>
 
@@ -100,7 +115,7 @@ const Journal = () => {
                         name={catagory[i]}
                         value={listName.rating}
                         onChange={(event, newValue) => {
-                          handleChangeRating(catagory[i], newValue);
+                          handleChangeRating(i, newValue);
                         }}
                         precision={0.5}
                       />
