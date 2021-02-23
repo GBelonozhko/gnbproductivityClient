@@ -13,6 +13,11 @@ import {
   CardHeader,
   Divider,
   CircularProgress,
+  Chip,
+  Modal,
+  Fade,
+  makeStyles,
+  Backdrop,
 } from "@material-ui/core";
 import Rating from "@material-ui/lab/Rating";
 import { useSelector, useDispatch } from "react-redux";
@@ -25,8 +30,22 @@ import {
 } from "../store/actions/ToDo.Action";
 import axios from "axios";
 
+const useStyles = makeStyles((theme) => ({
+  modal: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: "50%",
+  },
+
+  archive: {
+    float: "right",
+  },
+}));
+
 const Journal = () => {
   const dispatch = useDispatch();
+  const classes = useStyles();
 
   const userId = useSelector((state) => state.Auth.userId);
   const todoLists = useSelector((state) => state.Todos.todoLists);
@@ -37,12 +56,15 @@ const Journal = () => {
   const [rating, setRating] = useState([0, 0]);
   const [catagory, setCatagory] = useState(["Happieness", "Productivity"]);
   const [journal, setJournal] = useState("");
+  const [previousJournals, setpreviousJournals] = useState([]);
+  const [selectedJournal, setSelectedJournal] = useState({});
 
   useEffect(() => {
     dispatch(initCompleteCount(userId));
     dispatch(initTodoLists(userId));
     dispatch(initTotalTasks(userId));
     constructRatings();
+    initJournal();
   }, []);
 
   const constructRatings = () => {
@@ -53,6 +75,25 @@ const Journal = () => {
       catagoryObj.push(catagory);
     });
     setRating(ratingObj);
+  };
+
+  const initJournal = () => {
+    axios.get(`api/alljournals/${userId}`).then((res) => {
+      setpreviousJournals(res.data.journals);
+    });
+  };
+
+  const handleGetEntry = (journal) => {
+    setSelectedJournal(journal);
+    setJournal(journal.journal);
+    let newRating = [];
+    let newCatagories = [];
+    journal.rating.map((obj) => {
+      newRating.push(obj.rating);
+      newCatagories.push(obj.catagory);
+    });
+    setCatagory(newCatagories);
+    setRating(newRating);
   };
 
   const handleChangeRating = (index, newRating) => {
@@ -94,6 +135,7 @@ const Journal = () => {
                     fullWidth
                     multiline={true}
                     margin='normal'
+                    value={journal}
                     onChange={(event) => setJournal(event.target.value)}
                   />
                   <Button type='submit' fullWidth onClick={handleSubmitJournal}>
@@ -101,6 +143,15 @@ const Journal = () => {
                   </Button>
                 </form>
               </Card>
+              {previousJournals.map((journal) => {
+                return (
+                  <Chip
+                    key={journal._id}
+                    label={journal.createdAt}
+                    onClick={(journal) => handleGetEntry(journal)}
+                  />
+                );
+              })}
             </Grid>
 
             <Grid item xs={3}>
