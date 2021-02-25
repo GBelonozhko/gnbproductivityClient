@@ -19,6 +19,7 @@ import {
   makeStyles,
   Backdrop,
 } from "@material-ui/core";
+import Pagination from '@material-ui/lab/Pagination';
 import Rating from "@material-ui/lab/Rating";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -57,7 +58,10 @@ const Journal = () => {
   const [catagory, setCatagory] = useState(["Happieness", "Productivity"]);
   const [journal, setJournal] = useState("");
   const [previousJournals, setpreviousJournals] = useState([]);
-  const [selectedJournal, setSelectedJournal] = useState({});
+  const [selectedJournal, setSelectedJournal] = useState({ rating: [] });
+  const [limit, setLimit] = useState(2);
+  const [skip, setSkip] = useState(0);
+    const [size, setSize] = useState(0);
 
   useEffect(() => {
     dispatch(initCompleteCount(userId));
@@ -85,15 +89,7 @@ const Journal = () => {
 
   const handleGetEntry = (journal) => {
     setSelectedJournal(journal);
-    setJournal(journal.journal);
-    let newRating = [];
-    let newCatagories = [];
-    journal.rating.map((obj) => {
-      newRating.push(obj.rating);
-      newCatagories.push(obj.catagory);
-    });
-    setCatagory(newCatagories);
-    setRating(newRating);
+    console.log(selectedJournal);
   };
 
   const handleChangeRating = (index, newRating) => {
@@ -124,7 +120,7 @@ const Journal = () => {
             container
             direction='row'
             justify='space-evenly'
-            alignItems='center'>
+            >
             <Grid item xs={8}>
               <Typography variant='h3' align='center' color='secondary'>
                 Journal Entry
@@ -143,15 +139,41 @@ const Journal = () => {
                   </Button>
                 </form>
               </Card>
-              {previousJournals.map((journal) => {
-                return (
-                  <Chip
-                    key={journal._id}
-                    label={journal.createdAt}
-                    onClick={(journal) => handleGetEntry(journal)}
-                  />
-                );
-              })}
+              <Card className='AuthTopMargin'>
+                <Grid
+                  container
+                  direction='row'
+                  justify='space-evenly'
+                  alignItems='center'>
+                  {previousJournals.map((journali) => {
+                    return (
+                      <div key={journali._id}>
+                        <Grid xs={3}>
+                          <Typography variant='body1' gutterBottom display='block'>
+                            {journali.journal}
+                          </Typography>
+                        </Grid>
+                        <Grid xs={3}>
+                          {journali.rating.map((rate) => {
+                            return (
+                              <div>
+                                {rate.catagory}
+                                <Rating
+                                  value={rate.rating}
+                                  disabled
+                                  precision={0.5}
+                                />
+                              </div>
+                            );
+                          })}
+                        </Grid>
+                      </div>
+                    );
+                  })}
+                  <Pagination count={10} color="primary" />
+                </Grid>
+                
+              </Card>
             </Grid>
 
             <Grid item xs={3}>
