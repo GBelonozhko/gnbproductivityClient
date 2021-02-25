@@ -19,7 +19,8 @@ import {
   makeStyles,
   Backdrop,
 } from "@material-ui/core";
-import Pagination from '@material-ui/lab/Pagination';
+import Pagination from "@material-ui/lab/Pagination";
+import PaginationItem from "@material-ui/lab/PaginationItem";
 import Rating from "@material-ui/lab/Rating";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -59,9 +60,8 @@ const Journal = () => {
   const [journal, setJournal] = useState("");
   const [previousJournals, setpreviousJournals] = useState([]);
   const [selectedJournal, setSelectedJournal] = useState({ rating: [] });
-  const [limit, setLimit] = useState(2);
-  const [skip, setSkip] = useState(0);
-    const [size, setSize] = useState(0);
+
+  const [skip, setSkip] = useState(1);
 
   useEffect(() => {
     dispatch(initCompleteCount(userId));
@@ -116,11 +116,7 @@ const Journal = () => {
     <div>
       {!isLoading ? (
         <Container>
-          <Grid
-            container
-            direction='row'
-            justify='space-evenly'
-            >
+          <Grid container direction='row' justify='space-evenly'>
             <Grid item xs={8}>
               <Typography variant='h3' align='center' color='secondary'>
                 Journal Entry
@@ -139,41 +135,46 @@ const Journal = () => {
                   </Button>
                 </form>
               </Card>
-              <Card className='AuthTopMargin'>
-                <Grid
-                  container
-                  direction='row'
-                  justify='space-evenly'
-                  alignItems='center'>
-                  {previousJournals.map((journali) => {
-                    return (
-                      <div key={journali._id}>
-                        <Grid xs={3}>
-                          <Typography variant='body1' gutterBottom display='block'>
-                            {journali.journal}
-                          </Typography>
-                        </Grid>
-                        <Grid xs={3}>
-                          {journali.rating.map((rate) => {
-                            return (
-                              <div>
-                                {rate.catagory}
-                                <Rating
-                                  value={rate.rating}
-                                  disabled
-                                  precision={0.5}
-                                />
-                              </div>
-                            );
-                          })}
-                        </Grid>
-                      </div>
-                    );
-                  })}
-                  <Pagination count={10} color="primary" />
-                </Grid>
-                
-              </Card>
+              {previousJournals.length > 1 && (
+                <Card className='AuthTopMargin'>
+                  <Grid
+                    container
+                    direction='row'
+                    justify='space-around'
+                    alignItems='center'>
+                    <Grid xs={7}>
+                      <Typography variant='body1' gutterBottom display='block'>
+                        {previousJournals[skip - 1].journal}
+                      </Typography>
+                    </Grid>
+                    <Grid xs={4}>
+                      {previousJournals[skip - 1].rating.map((rate) => {
+                        return (
+                          <div>
+                            {rate.catagory}
+                            <Rating
+                              value={rate.rating}
+                              disabled
+                              precision={0.5}
+                            />
+                          </div>
+                        );
+                      })}
+                      <Pagination
+                        count={previousJournals.length}
+                        color='primary'
+                        page={skip}
+                        onChange={(e, page) => {
+                          setSkip(page);
+                        }}
+                      />
+                    </Grid>
+                    <Grid xs={12}>
+                      
+                    </Grid>
+                  </Grid>
+                </Card>
+              )}
             </Grid>
 
             <Grid item xs={3}>
