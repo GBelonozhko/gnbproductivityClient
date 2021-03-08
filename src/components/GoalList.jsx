@@ -22,8 +22,11 @@ import { IoIosSend } from "react-icons/io";
 import { BiArchiveOut, BiArchiveIn } from "react-icons/bi";
 import { GiClockwork, GiMonumentValley } from "react-icons/gi";
 import { MdCheck } from "react-icons/md";
-import axios from "axios";
+
 import moment from "moment";
+import SpeedDial from '@material-ui/lab/SpeedDial';
+import SpeedDialIcon from '@material-ui/lab/SpeedDialIcon';
+import SpeedDialAction from '@material-ui/lab/SpeedDialAction';
 
 const GoalList = (props) => {
   const useStyles = makeStyles((theme) => ({
@@ -132,6 +135,27 @@ const GoalList = (props) => {
                       </ListItemText>
 
                       <Grid xs={2}>
+                      <SpeedDial
+                      ariaLabel="SpeedDial example"
+                      //className={}
+                      //hidden={}
+                      icon={<SpeedDialIcon />}
+                      //onClose={}
+                      //onOpen={}
+                      //open={}
+                      //direction={}
+                    >
+                      
+                        <SpeedDialAction
+                          //key={}
+                          icon={ <GiClockwork />}
+                          //tooltipTitle={}
+                          //onClick={}
+                        />
+                  
+                    </SpeedDial>
+
+
                         {(props.inProgress === "" || props.inProgress === todo._id) &&
                           todo.endTime == null && (
                             <div className={classes.wrapper}>

@@ -20,7 +20,8 @@ import {
 import { IoIosSend } from "react-icons/io";
 import { useSelector } from "react-redux";
 import axios from "axios";
-import moment from 'moment'
+import moment from "moment";
+import SubmitCard from "../components/SubmitCard";
 
 const useStyles = makeStyles({
   root: {
@@ -50,7 +51,13 @@ const FitnessTracker = () => {
   });
 
   const columns = [
-    { id: "createdAt", label: "Date", minWidth: 170, align: "center", format:Date},
+    {
+      id: "createdAt",
+      label: "Date",
+      minWidth: 170,
+      align: "center",
+      format: Date,
+    },
 
     {
       id: "value",
@@ -70,7 +77,7 @@ const FitnessTracker = () => {
   const handleSelected = (title) => {
     setSelected(title);
     setPage(0);
-    setRowsPerPage(10)
+    setRowsPerPage(10);
 
     axios
       .get(`/api/numtracker/${userId}/${title}`)
@@ -86,25 +93,27 @@ const FitnessTracker = () => {
     setPage(0);
   };
 
-  const handleNumTrackTitleSubmit = (numTrack) => {
+  const handleNumTrackTitleSubmit = () => {
     axios.post(`/api/addnumtracker/`, { numTracker: numTrack });
-    setSelected(numTrack.title)
+    setSelected(numTrack.title);
     axios.get(`/api/getnumtackertitles/${userId}`).then((res) => {
       setTitles(res.data.numtrackTitle);
     });
   };
 
   const handleNumTrackValueSubmit = (numTrack) => {
-    axios.post(`/api/addnumtracker/`, { numTracker: numTrack })
-      setNumTrack({
-        creator: userId,
-        value: "",
-        title: "",
-      });
-    setSelected('')
+    setSelected("");
+    axios.post(`/api/addnumtracker/`, { numTracker: numTrack });
+
+    setNumTrack({
+      creator: userId,
+      value: "",
+      title: "",
+    });
+    
+    setSelected(numTrack.title)
   };
 
-  
   const handleChangeTitle = (event) => {
     setNumTrack({
       ...numTrack,
@@ -124,29 +133,16 @@ const FitnessTracker = () => {
   return (
     <div>
       <Container>
-        <Card>
-          <TextField
-            id='standard-basic'
-            label='Enter New Goal'
-            fullWidth
-            margin='normal'
-            name='title'
-            value={numTrack.title}
-            onChange={(e) => handleChangeTitle(e)}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position='end'>
-                  <IconButton
-                    onClick={() => {
-                      handleNumTrackTitleSubmit(numTrack);
-                    }}>
-                    <IoIosSend />
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
-        </Card>
+        <SubmitCard
+          newtask={numTrack.title}
+          handleChangeNewTodoList={handleChangeTitle}
+          handleSubmitNewTodoList={handleNumTrackTitleSubmit}
+          displayString={""}
+          label='Enter New Goal List'
+          name='title'
+        />
+
+       
         <Grid
           container
           direction='row'
@@ -196,9 +192,9 @@ const FitnessTracker = () => {
                             const value = row[column.id];
                             return (
                               <TableCell key={column.id} align={column.align}>
-                                { value.length > 20?
-                                   moment(value).fromNow(true)+ " ago":value
-                                  }
+                                {value.length > 20
+                                  ? moment(value).fromNow(true) + " ago"
+                                  : value}
                               </TableCell>
                             );
                           })}

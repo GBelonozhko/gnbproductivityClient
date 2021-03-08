@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+
 import Container from "@material-ui/core/Container";
 import Card from "@material-ui/core/Card";
 import TextField from "@material-ui/core/TextField";
@@ -26,7 +27,11 @@ import {
   setCompleteCount,
 } from "../store/actions/ToDo.Action";
 import { useSelector, useDispatch } from "react-redux";
+
 import GoalList from "../components/GoalList";
+import SubmitCard from "../components/SubmitCard";
+import FeatureTodoList from "../components/FeatureTodoList";
+import TodoListTitles from "../components/TodoListTitles";
 
 const useStyles = makeStyles((theme) => ({
   modal: {
@@ -161,7 +166,7 @@ const ListSelection = () => {
       : (isRoutineData = true);
     axios.patch(`/api/toggleRoutine/${todo._id}`, { isRoutineData });
     let dtodos = todos.map((dtodo, i) =>
-      dtodo._id == todo._id ? { ...todo, isRoutine: isRoutineData } : todos[i]
+      dtodo._id === todo._id ? { ...todo, isRoutine: isRoutineData } : todos[i]
     );
     setTodos(dtodos);
   };
@@ -228,123 +233,31 @@ const ListSelection = () => {
 
   return (
     <Container maxWidth='lg'>
-      <Card>
-        <Grid container direction='row' justify='center' alignItems='center'>
-          <Grid item xs={10}>
-            <TextField
-              name='title'
-              label='Enter New Goal List'
-              fullWidth
-              margin='normal'
-              value={newtask.title}
-              onChange={(e) => handleChangeNewTodoList(e)}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position='end'>
-                    <IconButton onClick={handleSubmitNewTodoList}>
-                      <IoIosSend />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
-          </Grid>
-          <Grid item>
-            <Typography variant='caption' color='initial'>
-              Completed Total of {completeCount} tasks of {totalTasks} tasks
-              created!
-            </Typography>
-          </Grid>
-        </Grid>
-      </Card>
+      <SubmitCard
+        newtask={newtask}
+        handleChangeNewTodoList={handleChangeNewTodoList}
+        handleSubmitNewTodoList={handleSubmitNewTodoList}
+        displayString={
+          "Completed Total of " +
+          completeCount +
+          "  tasks of " +
+          totalTasks +
+          " tasks created!"
+        }
+        label='Enter New Goal List'
+        name='title'
+      />
+
       <Grid
         container
         direction='row'
-        justify='space-evenly'
-        alignItems='flex-start'>
-        <Grid item xs={3}>
-          <Card className='AuthTopMargin'>
-            <CardActions onClick={() => handleOpen("TodaysAgenda")}>
-              <Grid
-                container
-                direction='row'
-                justify='center'
-                alignItems='center'>
-                <Grid item>
-                  <Typography variant='h4' align='center'>
-                    Todays Agenda
-                  </Typography>
-                </Grid>
-              </Grid>
-            </CardActions>
-          </Card>
-
-          <Card className='AuthTopMargin'>
-            <CardActions onClick={() => handleOpen("InCompletes")}>
-              <Grid
-                container
-                direction='row'
-                justify='center'
-                alignItems='center'>
-                <Grid item>
-                  <Typography variant='h4' align='center'>
-                    In Completes
-                  </Typography>
-                </Grid>
-              </Grid>
-            </CardActions>
-          </Card>
-
-          <Card className='AuthTopMargin'>
-            <CardActions onClick={() => handleOpen("OverDue")}>
-              <Grid
-                container
-                direction='row'
-                justify='center'
-                alignItems='center'>
-                <Grid item>
-                  <Typography variant='h4' align='center'>
-                    Over Due
-                  </Typography>
-                </Grid>
-              </Grid>
-            </CardActions>
-          </Card>
-          <Card className='AuthTopMargin'>
-          <CardActions onClick={() => handleOpen("ActiveRoutines")}>
-            <Grid
-              container
-              direction='row'
-              justify='center'
-              alignItems='center'>
-              <Grid item>
-                <Typography variant='h4' align='center'>
-                  Active Routines
-                </Typography>
-              </Grid>
-            </Grid>
-          </CardActions>
-        </Card>
-        </Grid>
+        justify='space-around'
+        alignItems='center'
+        spacing={0}>
+        <FeatureTodoList handleOpen={handleOpen} />
 
         <Grid item xs={8}>
-          {todoLists.map((title) => (
-            <Card key={title} className='AuthTopMargin'>
-              <CardActions onClick={() => handleOpen(title)}>
-                <Grid
-                  container
-                  direction='row'
-                  justify='center'
-                  alignItems='center'>
-                  <Grid item>
-                    <Typography variant='h4' align='center'>
-                      {title}
-                    </Typography>
-                  </Grid>
-                </Grid>
-              </CardActions>
-            </Card>
-          ))}
+          <TodoListTitles todoLists={todoLists} handleOpen={handleOpen} />
 
           <Modal
             aria-labelledby='transition-modal-title'

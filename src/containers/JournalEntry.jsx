@@ -31,6 +31,9 @@ import {
   setCompleteCount,
 } from "../store/actions/ToDo.Action";
 import axios from "axios";
+import moment from 'moment';
+import JournalSubmit from "../components/JournalSubmit";
+import { GiBookmarklet } from "react-icons/gi";
 
 const useStyles = makeStyles((theme) => ({
   modal: {
@@ -121,33 +124,27 @@ const Journal = () => {
               <Typography variant='h3' align='center' color='secondary'>
                 Journal Entry
               </Typography>
-              <Card>
-                <form>
-                  <TextField
-                    fullWidth
-                    multiline={true}
-                    margin='normal'
-                    value={journal}
-                    onChange={(event) => setJournal(event.target.value)}
-                  />
-                  <Button type='submit' fullWidth onClick={handleSubmitJournal}>
-                    Submit
-                  </Button>
-                </form>
-              </Card>
+              <JournalSubmit
+              journal={journal}
+              setJournal={setJournal}
+              handleSubmitJournal={handleSubmitJournal}
+              />
               {previousJournals.length > 1 && (
                 <Card className='AuthTopMargin'>
+                <CardHeader avatar={<GiBookmarklet/>} subheader={moment(previousJournals[skip - 1].createdAt).fromNow()}  title={moment(previousJournals[skip - 1].createdAt).calendar()}/>
                   <Grid
                     container
                     direction='row'
                     justify='space-around'
                     alignItems='center'>
-                    <Grid xs={7}>
+                    <Grid item xs={7}>
                       <Typography variant='body1' gutterBottom display='block'>
                         {previousJournals[skip - 1].journal}
                       </Typography>
                     </Grid>
-                    <Grid xs={4}>
+                  
+                    <Grid item xs={4}>
+                    
                       {previousJournals[skip - 1].rating.map((rate) => {
                         return (
                           <div>

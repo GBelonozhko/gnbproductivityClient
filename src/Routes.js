@@ -15,6 +15,7 @@ import ListSelection from './containers/ListSelection.jsx';
 import GoalList from './components/GoalList'
 
 import AppBar from './components/AppBar.jsx';
+import BottomNav from './components/BottomNav';
 
 import { useSelector, useDispatch } from 'react-redux';
 import * as actions from './store/actions/Auth.Action'
@@ -38,12 +39,12 @@ const Routes =() =>{
         <Route path ='/' exact component={Auth}/>
         <Route path ='/signup' exact component={Auth}/>
         <Route path ='/ListSelection' exact component={ListSelection}/>
-        <Route path ='/GoalList' exact component={GoalList}/>
-        <Route path ='/Agenda' exact component={Agenda}/>
+
         <Route path ='/FitnessTracker' exact component={FitnessTracker}/>
         <Route path ='/JournalEntry' exact component={JournalEntry}/>
-        <Route path ='/Journal' exact component={Journal}/>
+
         </Switch>
+        <BottomNav/>
         </BrowserRouter>
     );
 
