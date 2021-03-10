@@ -33,6 +33,7 @@ export default function SimpleBottomNavigation() {
       }}
       showLabels
       className={classes.root}>
+      
       <BottomNavigationAction
         label='List Selection'
         icon={

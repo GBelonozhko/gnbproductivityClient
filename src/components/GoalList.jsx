@@ -83,6 +83,7 @@ const GoalList = (props) => {
                 id='standard-basic'
                 label='Enter New Goal'
                 fullWidth
+                autoFocus
                 margin='normal'
                 name='task'
                 value={props.newtask.task}
@@ -135,25 +136,7 @@ const GoalList = (props) => {
                       </ListItemText>
 
                       <Grid xs={2}>
-                      <SpeedDial
-                      ariaLabel="SpeedDial example"
-                      //className={}
-                      //hidden={}
-                      icon={<SpeedDialIcon />}
-                      //onClose={}
-                      //onOpen={}
-                      //open={}
-                      //direction={}
-                    >
-                      
-                        <SpeedDialAction
-                          //key={}
-                          icon={ <GiClockwork />}
-                          //tooltipTitle={}
-                          //onClick={}
-                        />
-                  
-                    </SpeedDial>
+          
 
 
                         {(props.inProgress === "" || props.inProgress === todo._id) &&
